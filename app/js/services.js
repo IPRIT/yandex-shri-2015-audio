@@ -289,9 +289,11 @@ angular.module('Shri.services', [
             curPlayerState = 'stopped',
             fileLoading = false,
 
-            fadeTimeout,
+            fadeInterval,
+            fadeTimeout = 30,
 
-            firstStart = true;
+            curOffsetTime = 0,
+            startOffsetTime;
 
         (function init() {
             if (inited) {
@@ -386,14 +388,16 @@ angular.module('Shri.services', [
                 }
                 fileLoading = true;
                 audioContext.decodeAudioData(newTrack.arrayBuffer, function(buffer) {
+                    pause();
                     fileLoading = false;
                     sourceNode = audioContext.createBufferSource();
                     sourceNode.buffer = buffer;
                     sourceNode.connect(biquadfilterNode);
-                    firstStart = true;
                     newTrack.audioBuffer = buffer;
                     newTrack.arrayBuffer = null;
                     curTrack = newTrack;
+                    curOffsetTime = 0;
+
                     if (afterPlaying) {
                         play();
                     }
@@ -405,35 +409,89 @@ angular.module('Shri.services', [
                 sourceNode = audioContext.createBufferSource();
                 sourceNode.buffer = newTrack.audioBuffer;
                 sourceNode.connect(biquadfilterNode);
-                firstStart = true;
                 curTrack = newTrack;
+                curOffsetTime = 0;
+
                 if (callback) {
                     callback();
                 }
             }
         }
 
-        function play() {
-            if (curPlayerState !== 'stopped' || !curTrack) {
+        function play(immediately) {
+            if (curPlayerState !== 'stopped' && !fadeInterval || !curTrack || fileLoading) {
                 return;
             }
-            if (firstStart) {
-                sourceNode.start(0);
-                firstStart = false;
-            } else {
-                sourceNode.connect(biquadfilterNode);
+
+            if (immediately) {
+                clearInterval(fadeInterval);
+                return playFunc();
             }
-            curPlayerState = 'playing';
-            console.log('Audio Player: playing', curTrack);
+
+            if (fadeInterval) {
+                clearInterval(fadeInterval);
+                fadeInterval = null;
+            }
+            playFunc();
+            if (Math.abs(gainNode.gain.value - settings.curVolume) > -1e6) {
+                var curGainValue = gainNode.gain.value;
+                fadeInterval = setInterval(function() {
+                    curGainValue += 0.05;
+                    if (curGainValue >= settings.curVolume) {
+                        gainNode.gain.value = settings.curVolume;
+                        clearInterval(fadeInterval);
+                        fadeInterval = null;
+                        return;
+                    }
+                    gainNode.gain.value = curGainValue;
+                }, fadeTimeout);
+            }
+
+            function playFunc() {
+                startOffsetTime = audioContext.currentTime;
+                sourceNode = audioContext.createBufferSource();
+                sourceNode.buffer = curTrack.audioBuffer;
+                sourceNode.connect(biquadfilterNode);
+                sourceNode.start(0, curOffsetTime);
+                curPlayerState = 'playing';
+                console.log('Audio Player: playing', curTrack);
+            }
         }
 
-        function pause() {
-            if (curPlayerState === 'stopped' || !curTrack) {
+        function pause(immediately) {
+            if (curPlayerState !== 'playing' || !curTrack) {
                 return;
             }
-            sourceNode.disconnect();
-            curPlayerState = 'stopped';
-            console.log('Audio Player: paused', curTrack);
+
+            if (immediately) {
+                clearInterval(fadeInterval);
+                return stopFunc();
+            }
+
+            if (fadeInterval) {
+                clearInterval(fadeInterval);
+                fadeInterval = null;
+            }
+            var curGainValue = gainNode.gain.value;
+            fadeInterval = setInterval(function() {
+                curGainValue -= 0.05;
+                if (curGainValue <= 0) {
+                    gainNode.gain.value = 0;
+                    stopFunc();
+                    clearInterval(fadeInterval);
+                    fadeInterval = null;
+                    return;
+                }
+                gainNode.gain.value = curGainValue;
+            }, fadeTimeout);
+
+            function stopFunc() {
+                curOffsetTime += audioContext.currentTime - startOffsetTime;
+                sourceNode.stop(0);
+                sourceNode.disconnect();
+                curPlayerState = 'stopped';
+                console.log('Audio Player: paused', curTrack);
+            }
         }
 
         function canPlay() {
@@ -444,13 +502,24 @@ angular.module('Shri.services', [
             return settings;
         }
 
+        function setAudioVolume(volume) {
+            settings.curVolume = volume;
+            saveSettings();
+        }
+
+        function toggleLoop(force) {
+            settings.loop = force || !settings.loop;
+        }
+
         return {
             setAudioVisualisationFallback: setAudioVisualisationFallback,
             setTrack: changeTrack,
             play: play,
             pause: pause,
             canPlay: canPlay,
-            getSettings: curSettings
+            getSettings: curSettings,
+            setVolume: setAudioVolume,
+            toggleLoop: toggleLoop
         };
     }])
 ;

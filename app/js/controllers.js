@@ -17,7 +17,7 @@ angular.module('Shri.controllers', [
         console.log('Works!');
     }])
 
-    .controller('IndexCtrl', ['$scope', '_', 'AudioPlaylists', 'AudioPlayer', function($scope, _, AudioPlaylists, AudioPlayer) {
+    .controller('IndexCtrl', ['$scope', '_', 'AudioPlaylists', 'AudioPlayer', 'AudioTracks', function($scope, _, AudioPlaylists, AudioPlayer, AudioTracks) {
         $scope.$emit('change_title', {
             title: _('app_name_raw')
         });
@@ -29,23 +29,14 @@ angular.module('Shri.controllers', [
             if (!firstFile) {
                 return;
             }
-
-            var reader = new FileReader();
-            reader.addEventListener('load', function(fileEvent) {
-                var arrayBuffer = fileEvent.target.result;
-                var track = {
-                    id: 'test',
-                    name: 'Test',
-                    artist: 'Test test',
-                    duration: 201,
-                    originalName: 'test.mp3',
-                    photo: 'nope',
-                    arrayBuffer: arrayBuffer,
-                    audioBuffer: null
-                };
-                AudioPlayer.setTrack(track);
-            });
-            reader.readAsArrayBuffer(firstFile);
+            AudioTracks.create(firstFile, function(num) {
+                console.log(num + '%');
+            }, function(track) {
+                AudioTracks.add(track);
+                AudioPlayer.setTrack(track, function() {
+                    AudioPlayer.play();
+                });
+            })
         };
 
         $scope.play = function() {
@@ -55,5 +46,9 @@ angular.module('Shri.controllers', [
         $scope.pause = function() {
             AudioPlayer.pause();
         };
+
+        $scope.handleDrop = function() {
+            alert('Item has been dropped');
+        }
     }])
 ;

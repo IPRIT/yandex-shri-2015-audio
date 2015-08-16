@@ -6,7 +6,8 @@ angular.module('Shri', [
     'ngSanitize',
     'ngMaterial',
     'Shri.controllers',
-    'Shri.services'
+    'Shri.services',
+    'Shri.directives'
 ])
     .config(['$locationProvider', '$routeProvider', 'StorageProvider', function($locationProvider, $routeProvider, StorageProvider) {
         if (Config.Modes.test) {
@@ -19,7 +20,7 @@ angular.module('Shri', [
                 templateUrl: templateUrl('index', 'main'),
                 controller: 'IndexCtrl'
             })
-            .when('/profile', {
+            .when('/playlists', {
                 templateUrl: templateUrl('index', 'main'),
                 controller: 'IndexCtrl'
             })

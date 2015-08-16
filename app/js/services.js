@@ -269,7 +269,7 @@ angular.module('Shri.services', [
         }
     }])
 
-    .service('AudioPlayer', ['Storage', '$q', function(Storage, $q) {
+    .service('AudioPlayer', ['Storage', '$q', '$mdDialog', '_', function(Storage, $q, $mdDialog, _) {
         //source -> biquadFilter -> analyser -> gain -> dest
         var audioContext,
             sourceNode,
@@ -300,9 +300,7 @@ angular.module('Shri.services', [
                 return;
             }
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
             sourceNode = audioContext.createBufferSource();
-
             gainNode = audioContext.createGain();
 
             analyserNode = audioContext.createAnalyser();
@@ -388,15 +386,15 @@ angular.module('Shri.services', [
                 }
                 fileLoading = true;
                 audioContext.decodeAudioData(newTrack.arrayBuffer, function(buffer) {
-                    pause();
-                    fileLoading = false;
                     sourceNode = audioContext.createBufferSource();
                     sourceNode.buffer = buffer;
                     sourceNode.connect(biquadfilterNode);
                     newTrack.audioBuffer = buffer;
                     newTrack.arrayBuffer = null;
+                    newTrack.duration = buffer.duration;
                     curTrack = newTrack;
                     curOffsetTime = 0;
+                    fileLoading = false;
 
                     if (afterPlaying) {
                         play();
@@ -404,6 +402,17 @@ angular.module('Shri.services', [
                     if (callback) {
                         callback();
                     }
+                }, function(e) { // only on error attempt to sync on frame boundary
+                    fileLoading = false;
+                    $mdDialog.show(
+                        $mdDialog.alert()
+                            .parent(angular.element(document.querySelector('.view')))
+                            .clickOutsideToClose(true)
+                            .title(_('file_not_found_raw'))
+                            .content(_('opera_error_raw'))
+                            .ariaLabel('Alert Dialog')
+                            .ok(_('close_button_text_raw'))
+                    );
                 });
             } else {
                 sourceNode = audioContext.createBufferSource();
@@ -419,7 +428,8 @@ angular.module('Shri.services', [
         }
 
         function play(immediately) {
-            if (curPlayerState !== 'stopped' && !fadeInterval || !curTrack || fileLoading) {
+            if (curPlayerState !== 'stopped' && !fadeInterval
+                || !curTrack || fileLoading) {
                 return;
             }
 
@@ -511,6 +521,18 @@ angular.module('Shri.services', [
             settings.loop = force || !settings.loop;
         }
 
+        function getOffsetTime() {
+            return curOffsetTime;
+        }
+
+        function isLoop() {
+            return settings.loop;
+        }
+
+        function getCurTrack() {
+            return curTrack;
+        }
+
         return {
             setAudioVisualisationFallback: setAudioVisualisationFallback,
             setTrack: changeTrack,
@@ -519,8 +541,141 @@ angular.module('Shri.services', [
             canPlay: canPlay,
             getSettings: curSettings,
             setVolume: setAudioVolume,
-            toggleLoop: toggleLoop
+            toggleLoop: toggleLoop,
+            isLoop: isLoop,
+            getOffsetTime: getOffsetTime,
+            getCurTrack: getCurTrack
         };
+    }])
+
+    .service('AudioTracks', ['Storage', '$q', '_', '$mdDialog', function(Storage, $q, _, $mdDialog) {
+        var tracks = Object.create(null);
+
+        return {
+            create: createTrack,
+            add: addTrack,
+            getAll: getAllTracks,
+            getById: getTrackById,
+            deleteById: deleteTrackById,
+            deleteAll: deleteAllTracks
+        };
+
+        function createUniqId() {
+            return (Math.random() * 1000).toString(16).replace('.', '_');
+        }
+
+        function createTrack(file, progressCallback, onReady) {
+            var artist, name;
+            try {
+                id3(file, function(err, tags) {
+                    artist = tags.artist;
+                    name = tags.title;
+                    proccessFile();
+                });
+            } catch (e) {
+                console.log(e);
+                proccessFile();
+            }
+
+            function proccessFile() {
+                var reader = new FileReader();
+                reader.onerror = errorFileReaderHandler;
+                reader.onprogress = updateProgress.bind(this, progressCallback);
+                reader.addEventListener('load', function(progressEvent) {
+                    var arrayBuffer = progressEvent.target.result;
+                    var track = {
+                        id: createUniqId(),
+                        name: name || file.name,
+                        artist: artist || _('unknown_artist_raw'),
+                        duration: 0,
+                        originalName: file.name,
+                        photo: 'nope',
+                        arrayBuffer: arrayBuffer,
+                        audioBuffer: null
+                    };
+                    onReady(track);
+                });
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function errorFileReaderHandler(evt) {
+            switch (evt.target.error.code) {
+                case evt.target.error.NOT_FOUND_ERR:
+                    $mdDialog.show(
+                        $mdDialog.alert()
+                            .parent(angular.element(document.querySelector('.view')))
+                            .clickOutsideToClose(true)
+                            .title(_('file_not_found_raw'))
+                            .content(_('file_not_found_error_raw'))
+                            .ariaLabel('Alert Dialog Demo')
+                            .ok(_('close_button_text'))
+                    );
+                    break;
+                case evt.target.error.NOT_READABLE_ERR:
+                    $mdDialog.show(
+                        $mdDialog.alert()
+                            .parent(angular.element(document.querySelector('.view')))
+                            .clickOutsideToClose(true)
+                            .title(_('file_not_found_raw'))
+                            .content(_('file_not_readable_error_raw'))
+                            .ariaLabel('Alert Dialog Demo')
+                            .ok(_('close_button_text_raw'))
+                    );
+                    break;
+                case evt.target.error.ABORT_ERR:
+                    break; // noop
+                default:
+                    $mdDialog.show(
+                        $mdDialog.alert()
+                            .parent(angular.element(document.querySelector('.view')))
+                            .clickOutsideToClose(true)
+                            .title(_('file_not_found_raw'))
+                            .content(_('unknown_error_content_raw'))
+                            .ariaLabel('Alert Dialog Demo')
+                            .ok(_('close_button_text_raw'))
+                    );
+            }
+        }
+
+        function updateProgress(progressCallback, evt) {
+            if (evt.lengthComputable) {
+                progressCallback(Math.round((evt.loaded / evt.total) * 100));
+            }
+        }
+
+        function addTrack(track) {
+            if (tracks[track.id]) {
+                return tracks[track.id];
+            }
+            tracks[track.id] = track;
+        }
+
+        function getAllTracks() {
+            var retArr = [];
+            for (var key in tracks) {
+                retArr.push(tracks[key]);
+            }
+            return retArr;
+        }
+
+        function getTrackById(id) {
+            if (typeof id === 'string' && tracks[id]) {
+                return tracks[id];
+            }
+            return null;
+        }
+
+        function deleteTrackById(id) {
+            if (typeof id === 'string' && tracks[id]) {
+                tracks[id] = null;
+                delete tracks[id];
+            }
+        }
+
+        function deleteAllTracks() {
+            tracks = Object.create(null);
+        }
     }])
 ;
 

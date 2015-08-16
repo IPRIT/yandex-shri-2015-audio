@@ -32,3 +32,7 @@ textarea {
 .image {
     border: 0;
 }
+
+.droppable_over {
+    background-color: #cc0000 !important;
+}

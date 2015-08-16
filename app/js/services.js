@@ -293,7 +293,9 @@ angular.module('Shri.services', [
             fadeTimeout = 30,
 
             curOffsetTime = 0,
-            startOffsetTime;
+            startOffsetTime,
+
+            operaNitificationShowed = false;
 
         (function init() {
             if (inited) {
@@ -335,6 +337,19 @@ angular.module('Shri.services', [
                 inited = true;
                 console.log('Audio Service has been initialized.');
             });
+
+            if (Config.Navigator.opera && !operaNitificationShowed) {
+                $mdDialog.show(
+                    $mdDialog.alert()
+                        .parent(angular.element(document.querySelector('.view')))
+                        .clickOutsideToClose(true)
+                        .title(_('warning_title_raw'))
+                        .content(_('opera_error_raw'))
+                        .ariaLabel('Alert Dialog')
+                        .ok(_('try_force_raw'))
+                );
+                operaNitificationShowed = true;
+            }
         })();
 
         function getSettings() {
@@ -403,6 +418,19 @@ angular.module('Shri.services', [
                     }
                     if (callback) {
                         callback();
+                    }
+                }, function() {
+                    if (Config.Navigator.opera) {
+                        $mdDialog.show(
+                            $mdDialog.alert()
+                                .parent(angular.element(document.querySelector('.view')))
+                                .clickOutsideToClose(true)
+                                .title(_('file_not_found'))
+                                .content(_('opera_error'))
+                                .ariaLabel('Alert Dialog')
+                                .ok(_('close_button_text_raw'))
+                                .targetEvent(ev)
+                        );
                     }
                 });
             } else {

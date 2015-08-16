@@ -17,16 +17,19 @@ angular.module('Shri.directives', [])
         }
     })
 
-    .directive('droppable', function() {
+    .directive('droppable', ['_', function(_) {
         //alert(1);
         return {
             link: function(scope, elem) {
                 var el = elem[0];
                 //el.draggable = true;
+                var droppableElement = angular.element(el),
+                    dropzoneMessage = droppableElement.find('.dropzone__message')[0];
                 el.addEventListener('dragover', function(e) {
                     //evt.stopPropagation();
                     if (e.preventDefault) e.preventDefault();
                     angular.element(el).addClass('droppable_over');
+                    dropzoneMessage.innerHTML = _('draggable_message_could_drop_raw');
 
                     return false;
                 }, false);
@@ -35,6 +38,7 @@ angular.module('Shri.directives', [])
                     //evt.stopPropagation();
                     if (e.preventDefault) e.preventDefault();
                     angular.element(el).removeClass('droppable_over');
+                    dropzoneMessage.innerHTML = _('draggable_message_raw');
 
                     return false;
                 }, false);
@@ -43,6 +47,7 @@ angular.module('Shri.directives', [])
                     //evt.stopPropagation();
                     if (e.preventDefault) e.preventDefault();
                     angular.element(el).addClass('droppable_over');
+                    dropzoneMessage.innerHTML = _('draggable_message_could_drop_raw');
 
                     return false;
                 }, false);
@@ -52,7 +57,8 @@ angular.module('Shri.directives', [])
                     if (e.preventDefault) e.preventDefault();
 
                     angular.element(el).removeClass('droppable_over');
-                    console.log(e.dataTransfer);
+                    dropzoneMessage.innerHTML = _('draggable_message_raw');
+
                     scope.openFiles(e.dataTransfer.files, true);
 
                     return false;
@@ -65,5 +71,5 @@ angular.module('Shri.directives', [])
                 }, false);
             }
         };
-    })
+    }])
 ;

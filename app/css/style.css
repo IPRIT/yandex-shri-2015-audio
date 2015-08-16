@@ -45,12 +45,14 @@ textarea {
     box-sizing: border-box;
 }
 .page__inner {
-    padding: 64px 0 0;
     min-height: 100%;
     background-color: #E9E9E9;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+}
+.page__content {
+    min-height: 100%;
 }
 .header_fixed {
     position: fixed;
@@ -74,11 +76,12 @@ textarea {
     height: 200px;
     width: 200px;
     margin: 0 auto;
-    padding-top: 100px;
+    padding-top: 164px;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    position: relative;
 }
 .dropzone__image {
     background-color: #3F51B5;
@@ -91,11 +94,13 @@ textarea {
     -ms-transition: all .1s ease-out;
     -o-transition: all .1s ease-out;
     transition: all .1s ease-out;
-    height: 100%;
-    width: 100%;
+    height: 200px;
+    width: 200px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+    z-index: 2;
+    position: absolute;
 }
 .dropzone__image-src {
     margin: 0 auto;
@@ -117,16 +122,17 @@ textarea {
     background-color: rgba(79, 127, 240, 0.47);
 }
 .droppable_over .dropzone__image {
-    background-color: #4f7ff0;
+    background-color: #4769d1;
 }
 .droppable_over .dropzone__image:hover {
-    background-color: #4f7ff0;
+    background-color: #3d5bb5;
 }
 .tracks {
     margin: 0 auto;
     max-width: 900px;
     background: #FFF;
     border-radius: 3px;
+    padding: 64px 0 0;
 }
 .track {
     text-transform: none;
@@ -230,4 +236,124 @@ textarea {
 }
 .player_state_opened {
     bottom: 0;
+}
+
+.dropzone__jump-block {
+    height: 200px;
+    width: 200px;
+    z-index: 0;
+    position: absolute;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    border-radius: 50%;
+    background-color: rgba(85, 136, 255, 0.8);
+    -webkit-box-shadow: inset 0 4px 1px 2px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: inset 0 4px 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0 4px 1px 2px rgba(0, 0, 0, 0.2);
+    -webkit-transition: all .1s ease-out;
+    -moz-transition: all .1s ease-out;
+    -ms-transition: all .1s ease-out;
+    -o-transition: all .1s ease-out;
+    transition: all .1s ease-out;
+    will-change: transform;
+}
+.droppable_over .dropzone__jump-block_dir_left {
+    -webkit-transform: rotate(15deg) scale(1.1);
+    -moz-transform: rotate(15deg) scale(1.1);
+    -ms-transform: rotate(15deg) scale(1.1);
+    -o-transform: rotate(15deg) scale(1.1);
+    transform: rotate(15deg) scale(1.1);
+    left: -23px;
+    bottom: 10px;
+    opacity: 1;
+}
+.droppable_over .dropzone__jump-block_dir_right {
+    -webkit-transform: rotate(-15deg) scale(1.2);
+    -moz-transform: rotate(-15deg) scale(1.2);
+    -ms-transform: rotate(-15deg) scale(1.2);
+    -o-transform: rotate(-15deg) scale(1.2);
+    transform: rotate(-15deg) scale(1.2);
+    left: 10px;
+    bottom: 16px;
+    opacity: 1;
+}
+.dropzone__jump-block_dir_left,
+.dropzone__jump-block_dir_right {
+    -webkit-transform: none;
+    -moz-transform: none;
+    -ms-transform: none;
+    -o-transform: none;
+    transform: none;
+    left: 0;
+    bottom: 0;
+    opacity: 0;
+}
+.droppable_over .dropzone__image {
+    -webkit-transform: scale(1.05);
+    -moz-transform: scale(1.05);
+    -ms-transform: scale(1.05);
+    -o-transform: scale(1.05);
+    transform: scale(1.05);
+}
+
+/*
+  We're using CSS transitions for when
+  the enter and move events are triggered
+  for the element that has the .repeated-item
+  class
+*/
+.repeated-item.ng-enter, .repeated-item.ng-move {
+    -webkit-transition: 0.5s linear all;
+    -moz-transition: 0.5s linear all;
+    -o-transition: 0.5s linear all;
+    transition: 0.5s linear all;
+    opacity: 0;
+}
+
+/*
+ The ng-enter-active and ng-move-active
+ are where the transition destination properties
+ are set so that the animation knows what to
+ animate.
+*/
+.repeated-item.ng-enter.ng-enter-active,
+.repeated-item.ng-move.ng-move-active {
+    opacity: 1;
+}
+
+/*
+  We're using CSS keyframe animations for when
+  the leave event is triggered for the element
+  that has the .repeated-item class
+*/
+.repeated-item.ng-leave {
+    -webkit-animation: 0.5s my_animation;
+    -moz-animation: 0.5s my_animation;
+    -o-animation: 0.5s my_animation;
+    animation: 0.5s my_animation;
+}
+
+@keyframes my_animation {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/*
+  Unfortunately each browser vendor requires
+  its own definition of keyframe animation code...
+*/
+@-webkit-keyframes my_animation {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@-moz-keyframes my_animation {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@-o-keyframes my_animation {
+    from { opacity: 1; }
+    to { opacity: 0; }
 }

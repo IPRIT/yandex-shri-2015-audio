@@ -217,3 +217,17 @@ textarea {
     top: 24%;
     right: 23px;
 }
+.tracks__inner_offset {
+    padding-bottom: 100px;
+}
+.player {
+    -webkit-transition: bottom .1s ease-out;
+    -moz-transition: bottom .1s ease-out;
+    -ms-transition: bottom .1s ease-out;
+    -o-transition: bottom .1s ease-out;
+    transition: bottom .1s ease-out;
+    bottom: -80px;
+}
+.player_state_opened {
+    bottom: 0;
+}

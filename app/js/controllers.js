@@ -31,6 +31,7 @@ angular.module('Shri.controllers', [
         $scope.playing = false;
         $scope.curTrack = null;
         $scope.curState = 'stopped';
+        $scope.curPanelState = 'hidden';
 
         $scope.openFiles = function(e, flag) {
             var node,
@@ -73,6 +74,7 @@ angular.module('Shri.controllers', [
         };
 
         $scope.playTrack = function(track, e) {
+            $scope.curPanelState = 'opened';
             if ($scope.curTrack && $scope.curTrack.id === track.id) {
                 $scope.curState === 'playing'
                     ? $scope.pause() : $scope.play();

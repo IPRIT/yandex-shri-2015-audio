@@ -29,7 +29,7 @@ angular.module('Shri.directives', [])
                     //evt.stopPropagation();
                     if (e.preventDefault) e.preventDefault();
                     angular.element(el).addClass('droppable_over');
-                    dropzoneMessage.innerHTML = _('app_name_raw');
+                    dropzoneMessage.innerHTML = _('draggable_message_could_drop_raw');
 
                     return false;
                 }, false);
@@ -38,7 +38,7 @@ angular.module('Shri.directives', [])
                     //evt.stopPropagation();
                     if (e.preventDefault) e.preventDefault();
                     angular.element(el).removeClass('droppable_over');
-                    dropzoneMessage.innerHTML = _('close_button_text_raw');
+                    dropzoneMessage.innerHTML = _('draggable_message_raw');
 
                     return false;
                 }, false);
@@ -47,7 +47,7 @@ angular.module('Shri.directives', [])
                     //evt.stopPropagation();
                     if (e.preventDefault) e.preventDefault();
                     angular.element(el).addClass('droppable_over');
-                    dropzoneMessage.innerHTML = _('app_name_raw');
+                    dropzoneMessage.innerHTML = _('draggable_message_could_drop_raw');
 
                     return false;
                 }, false);
@@ -57,7 +57,7 @@ angular.module('Shri.directives', [])
                     if (e.preventDefault) e.preventDefault();
 
                     angular.element(el).removeClass('droppable_over');
-                    dropzoneMessage.innerHTML = _('close_button_text_raw');
+                    dropzoneMessage.innerHTML = _('draggable_message_raw');
 
                     scope.openFiles(e.dataTransfer.files, true);
 

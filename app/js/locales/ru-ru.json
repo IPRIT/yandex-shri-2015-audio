@@ -1,6 +1,7 @@
 {
   "test": "i18n работает",
   "app_name": "Яндекс ШРИ Аудио Плеер",
+  "app_name_short": "Аудио Плеер",
   "unknown_artist": "Неизвестный исполнитель",
   "file_not_found": "Ошибка получения файла",
   "file_not_found_error": "Файл не найден",
@@ -9,5 +10,7 @@
   "unknown_error_content": "Неизвестная ошибка",
   "warning_title": "Предупреждение",
   "try_force": "Попробовать все равно",
+  "draggable_message": "Перетащите сюда Вашу любимую музыку",
+  "draggable_message_could_drop": "Уже можно отпускать",
   "opera_error": "Похоже, Ваш браузер - Opera. Для данного браузера замечено странное поведение функции decodeAudioData. Ваша музыка, возможно, воспроизводиться не будет. Описание проблемы: Браузер не выдает исключение, после вызова функции decodeAudioData. Похожая проблема: http://stackoverflow.com/questions/10365335/decodeaudiodata-returning-a-null-error"
 }

@@ -19,6 +19,8 @@
         <div class="dropzone" droppable ng-show="tracks.length == 0 && !loading">
             <input hidden type="file" multiple id="files_input" accept="audio/*" onchange="angular.element(this).scope().openFiles(event)">
             <div class="dropzone__center">
+                <div class="dropzone__jump-block dropzone__jump-block_dir_left"></div>
+                <div class="dropzone__jump-block dropzone__jump-block_dir_right"></div>
                 <div class="dropzone__image">
                     <div class="dropzone__image-src">
                         <md-icon md-svg-icon="app/img/icons/ic_audiotrack_48px.svg" style="color: white;"></md-icon>
@@ -28,8 +30,8 @@
             </div>
         </div>
         <div class="tracks" ng-show="tracks.length > 0">
-            <div class="tracks__inner" ng-class="{'tracks__inner_offset': curPanelState === 'opened'}">
-                <md-button class="track" ng-click="playTrack(track, $event)" ng-repeat="track in tracks">
+            <div class="tracks__inner" ng-class="{'tracks__inner_offset': curPanelState === 'opened' && tracks.length > 4}">
+                <md-button class="track" md-ripple-size="partial" ng-click="playTrack(track, $event)" ng-repeat="track in tracks">
                     <div class="track__name">{{track.name}}</div>
                     <div class="track__artist">{{track.artist}}</div>
                     <div class="track__spinner" ng-show="track.id == curTrack.id && loading">

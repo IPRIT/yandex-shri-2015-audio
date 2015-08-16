@@ -7,5 +7,7 @@
   "close_button_text": "Закрыть",
   "file_not_readable_error": "Файл невозможно прочитать",
   "unknown_error_content": "Неизвестная ошибка",
-  "opera_error": "Похоже Ваш браузер - Opera. Описание проблемы: Браузер не выдает исключение, после вызова функции decodeAudioData. Похожая проблема: http://stackoverflow.com/questions/10365335/decodeaudiodata-returning-a-null-error"
+  "warning_title": "Предупреждение",
+  "try_force": "Попробовать все равно",
+  "opera_error": "Похоже, Ваш браузер - Opera. Для данного браузера замечено странное поведение функции decodeAudioData. Ваша музыка, возможно, воспроизводиться не будет. Описание проблемы: Браузер не выдает исключение, после вызова функции decodeAudioData. Похожая проблема: http://stackoverflow.com/questions/10365335/decodeaudiodata-returning-a-null-error"
 }

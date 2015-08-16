@@ -1,0 +1,34 @@
+html, body {
+    min-height: 100%;
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+html {
+    font: 14px Roboto, Helvetica, 'Helvetica Neue', sans-serif;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+}
+body {
+    overflow-x: hidden;
+}
+svg:not(:root) {
+    overflow: hidden;
+}
+button,html input[type=button],input[type=reset],input[type=submit] {
+    -webkit-appearance: button;
+    cursor: pointer;
+}
+button[disabled],html input[disabled] {
+    cursor: default;
+}
+textarea {
+    overflow: auto;
+}
+
+.image {
+    border: 0;
+}

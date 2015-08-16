@@ -92,13 +92,12 @@ angular.module('Shri.controllers', [
         };
 
         var waveform = new Waveform({
-            container: document.querySelector(".player__waveform"),
-            innerColor: "#FE9EDB"
+            container: document.querySelector('.player__waveform'),
+            innerColor: '#3F51B5'
         });
 
         $timeout(function() {
             AudioPlayer.setAudioVisualisationFallback(function(data) {
-                console.log()
                 waveform.update({
                     data: data
                 });

@@ -1,6 +1,4 @@
 html, body {
-    min-height: 100%;
-    height: 100%;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -12,8 +10,12 @@ html {
     -webkit-text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
 }
+html, body {
+    height: 100% !important;
+}
 body {
     overflow-x: hidden;
+    overflow-y: scroll;
     background-color: #E9E9E9;
 }
 svg:not(:root) {
@@ -34,7 +36,6 @@ textarea {
     border: 0;
 }
 .view {
-    min-height: 100%;
     height: 100%;
 }
 .page {
@@ -45,8 +46,8 @@ textarea {
 }
 .page__inner {
     padding: 64px 0 0;
-    background-color: #fff;
-    height: 100%;
+    min-height: 100%;
+    background-color: #E9E9E9;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -56,11 +57,10 @@ textarea {
     width: 100%;
 }
 .dropzone {
-    height: 100%;
+    min-height: 100%;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    background-color: rgba(233, 233, 233, 0.75);
     -webkit-transition: background .1s ease-out;
     -moz-transition: background .1s ease-out;
     -ms-transition: background .1s ease-out;
@@ -120,9 +120,6 @@ textarea {
 .droppable_over .dropzone__image:hover {
     background-color: #4f7ff0;
 }
-.page__inner {
-    background-color: rgba(233, 233, 233, 0.75);
-}
 .tracks {
     margin: 0 auto;
     max-width: 900px;
@@ -161,6 +158,8 @@ textarea {
     z-index: 501;
     width: 100%;
     height: 100%;
+    background-color: rgba(255, 255, 255, 0.2);
+    box-sizing: border-box;
 }
 .player {
     position: fixed;
@@ -178,15 +177,27 @@ textarea {
     width: 100%;
     height: 100%;
     box-sizing: content-box;
-
+    overflow: hidden;
 }
 .player__play, .player__pause {
     cursor: pointer;
+}
+.player__play button, .player__pause button {
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    overflow: visible;
+}
+.player__play button:hover, .player__pause button:hover {
+    background: rgba(255, 255, 255, 0.6) !important;
+    overflow: visible;
 }
 .player__waveform {
     height: 100%;
     -webkit-filter: blur(7px);
     filter: blur(7px);
     -moz-filter: blur(7px);
-    padding: 0 5px;
+    padding: 5px 0 5px;
+}
+.dropzone__image:active {
+    background-color: #4f7ff0;
 }

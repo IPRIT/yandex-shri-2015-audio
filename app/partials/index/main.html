@@ -32,6 +32,9 @@
                 <md-button class="track" ng-click="playTrack(track, $event)" ng-repeat="track in tracks">
                     <div class="track__name">{{track.name}}</div>
                     <div class="track__artist">{{track.artist}}</div>
+                    <div class="track__spinner" ng-show="track.id == curTrack.id && loading">
+                        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+                    </div>
                 </md-button>
             </div>
         </div>
@@ -41,7 +44,7 @@
             <div class="player__overlay">
                 <div class="player__waveform"></div>
             </div>
-            <div class="player__inner-track">
+            <div class="player__inner-track" ng-class="{'player__inner-track_type_innactive': curState === 'stopped'}">
                 <div class="player__controls" ng-switch="curState">
                     <div class="player__play" ng-switch-when="stopped">
                         <md-button class="md-icon-button player__play-button" aria-label="Play" ng-click="play()">

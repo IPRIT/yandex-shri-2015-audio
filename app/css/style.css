@@ -67,6 +67,8 @@ textarea {
     -o-transition: background .1s ease-out;
     transition: background .1s ease-out;
     cursor: pointer;
+    position: absolute;
+    width: 100%;
 }
 .dropzone__center {
     height: 200px;
@@ -146,7 +148,7 @@ textarea {
 }
 .player__inner {
     background: #FFF;
-    box-shadow: 0 -2px 3px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 0 -2px 0 0 rgba(0, 0, 0, 0.15);
     max-width: 900px;
     margin: 0 auto;
     position: relative;
@@ -160,6 +162,14 @@ textarea {
     height: 100%;
     background-color: rgba(255, 255, 255, 0.2);
     box-sizing: border-box;
+    -webkit-transition: background-color 5s ease-out;
+    -moz-transition: background-color 5s ease-out;
+    -ms-transition: background-color 5s ease-out;
+    -o-transition: background-color 5s ease-out;
+    transition: background-color 5s ease-in;
+}
+.player__inner-track_type_innactive {
+    background-color: #FFF;
 }
 .player {
     position: fixed;
@@ -200,4 +210,10 @@ textarea {
 }
 .dropzone__image:active {
     background-color: #4f7ff0;
+}
+.track__spinner {
+    position: absolute;
+    height: 100%;
+    top: 24%;
+    right: 23px;
 }

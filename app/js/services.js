@@ -300,7 +300,9 @@ angular.module('Shri.services', [
                 return;
             }
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
             sourceNode = audioContext.createBufferSource();
+
             gainNode = audioContext.createGain();
 
             analyserNode = audioContext.createAnalyser();
@@ -313,7 +315,7 @@ angular.module('Shri.services', [
                 }
                 analyserNode.getFloatFrequencyData(fFrequencyData);
                 for (var i = 0; i < fFrequencyData.length; ++i) {
-                    fFrequencyData[i] /= 250;
+                    fFrequencyData[i] /= 200;
                 }
                 visualizerFallback(fFrequencyData);
             }, defaultVisualizerTimeout);
@@ -367,8 +369,9 @@ angular.module('Shri.services', [
 
         function changeTrack(track, callback) {
             var stopped = false;
+            console.log(curPlayerState);
             if (curPlayerState === 'playing') {
-                pause();
+                pause(true);
                 stopped = true;
             }
             switchTrack(curTrack, track, stopped, callback);
@@ -378,7 +381,7 @@ angular.module('Shri.services', [
             var audioBuffer = newTrack.audioBuffer;
             if (!audioBuffer) {
                 if (!newTrack.arrayBuffer) {
-                    afterPlaying && play();
+                    afterPlaying && play(true);
                     if (callback) {
                         callback();
                     }
@@ -386,33 +389,22 @@ angular.module('Shri.services', [
                 }
                 fileLoading = true;
                 audioContext.decodeAudioData(newTrack.arrayBuffer, function(buffer) {
+                    pause(true);
+                    fileLoading = false;
                     sourceNode = audioContext.createBufferSource();
                     sourceNode.buffer = buffer;
                     sourceNode.connect(biquadfilterNode);
                     newTrack.audioBuffer = buffer;
                     newTrack.arrayBuffer = null;
-                    newTrack.duration = buffer.duration;
                     curTrack = newTrack;
                     curOffsetTime = 0;
-                    fileLoading = false;
 
                     if (afterPlaying) {
-                        play();
+                        play(true);
                     }
                     if (callback) {
                         callback();
                     }
-                }, function(e) { // only on error attempt to sync on frame boundary
-                    fileLoading = false;
-                    $mdDialog.show(
-                        $mdDialog.alert()
-                            .parent(angular.element(document.querySelector('.view')))
-                            .clickOutsideToClose(true)
-                            .title(_('file_not_found_raw'))
-                            .content(_('opera_error_raw'))
-                            .ariaLabel('Alert Dialog')
-                            .ok(_('close_button_text_raw'))
-                    );
                 });
             } else {
                 sourceNode = audioContext.createBufferSource();
@@ -428,8 +420,7 @@ angular.module('Shri.services', [
         }
 
         function play(immediately) {
-            if (curPlayerState !== 'stopped' && !fadeInterval
-                || !curTrack || fileLoading) {
+            if (curPlayerState !== 'stopped' && !fadeInterval || !curTrack || fileLoading) {
                 return;
             }
 
@@ -473,6 +464,7 @@ angular.module('Shri.services', [
                 return;
             }
 
+            console.log('stop');
             if (immediately) {
                 clearInterval(fadeInterval);
                 return stopFunc();
@@ -533,6 +525,10 @@ angular.module('Shri.services', [
             return curTrack;
         }
 
+        function getCurPlayerState() {
+            return curPlayerState;
+        }
+
         return {
             setAudioVisualisationFallback: setAudioVisualisationFallback,
             setTrack: changeTrack,
@@ -542,9 +538,10 @@ angular.module('Shri.services', [
             getSettings: curSettings,
             setVolume: setAudioVolume,
             toggleLoop: toggleLoop,
-            isLoop: isLoop,
             getOffsetTime: getOffsetTime,
-            getCurTrack: getCurTrack
+            isLoop: isLoop,
+            getCurTrack: getCurTrack,
+            getCurPlayerState: getCurPlayerState
         };
     }])
 

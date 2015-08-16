@@ -20,9 +20,5 @@ angular.module('Shri', [
                 templateUrl: templateUrl('index', 'main'),
                 controller: 'IndexCtrl'
             })
-            .when('/playlists', {
-                templateUrl: templateUrl('index', 'main'),
-                controller: 'IndexCtrl'
-            })
             .otherwise({redirectTo: '/'});
     }]);

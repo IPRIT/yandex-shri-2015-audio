@@ -20,13 +20,13 @@ angular.module('Shri.directives', [])
     .directive('droppable', function() {
         //alert(1);
         return {
-            restrict: 'A',
             link: function(scope, elem) {
                 var el = elem[0];
                 //el.draggable = true;
                 el.addEventListener('dragover', function(e) {
                     //evt.stopPropagation();
                     if (e.preventDefault) e.preventDefault();
+                    angular.element(el).addClass('droppable_over');
 
                     return false;
                 }, false);
@@ -52,8 +52,15 @@ angular.module('Shri.directives', [])
                     if (e.preventDefault) e.preventDefault();
 
                     angular.element(el).removeClass('droppable_over');
-                    scope.handleDrop(e.dataTransfer.files);
+                    console.log(e.dataTransfer);
+                    scope.openFiles(e.dataTransfer.files, true);
 
+                    return false;
+                }, false);
+
+                el.addEventListener('click', function(e) {
+                    var input = document.querySelector('#files_input');
+                    input.click();
                     return false;
                 }, false);
             }

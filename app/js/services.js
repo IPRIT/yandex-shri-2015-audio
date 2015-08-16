@@ -309,8 +309,7 @@ angular.module('Shri.services', [
             analyserNode.fftSize = 1024;
             var fFrequencyData = new Float32Array(analyserNode.fftSize);
             visualizerTimer = setInterval(function() {
-                if (curPlayerState === 'stopped' || !inited
-                    || visualizerFallback === angular.noop) {
+                if ((!inited || visualizerFallback === angular.noop) && curPlayerState === 'stopped') {
                     return;
                 }
                 analyserNode.getFloatFrequencyData(fFrequencyData);
@@ -464,7 +463,6 @@ angular.module('Shri.services', [
                 return;
             }
 
-            console.log('stop');
             if (immediately) {
                 clearInterval(fadeInterval);
                 return stopFunc();

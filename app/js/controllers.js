@@ -48,13 +48,15 @@ angular.module('Shri.controllers', [
                     sList.push(files[i]);
                 }
             }
+            if (!sList.length) {
+                $scope.loading = false;
+                return;
+            }
             loadFile();
             $scope.loading = true;
 
-            var loadedTracks = [];
             function loadFile() {
                 if (!sList[index]) {
-                    $scope.tracks = loadedTracks;
                     $scope.loading = false;
                     return;
                 }
@@ -62,7 +64,7 @@ angular.module('Shri.controllers', [
                     $scope.progress = progress;
                 }, function(track) {
                     if (track && track.id) {
-                        loadedTracks.push(track);
+                        $scope.tracks.push(track);
                     }
                     index++;
                     loadFile();
@@ -71,12 +73,20 @@ angular.module('Shri.controllers', [
         };
 
         $scope.playTrack = function(track, e) {
+            if ($scope.curTrack && $scope.curTrack.id === track.id) {
+                $scope.curState === 'playing'
+                    ? $scope.pause() : $scope.play();
+                return;
+            }
             $scope.playing = true;
             $scope.curTrack = track;
             $scope.curState = 'stopped';
+            $scope.loading = true;
+
             AudioPlayer.setTrack(track, function() {
                 AudioPlayer.play();
                 $scope.curState = AudioPlayer.getCurPlayerState();
+                $scope.loading = false;
                 $scope.playing = true;
             });
         };
@@ -92,13 +102,12 @@ angular.module('Shri.controllers', [
         };
 
         var waveform = new Waveform({
-            container: document.querySelector(".player__waveform"),
-            innerColor: "#FE9EDB"
+            container: document.querySelector('.player__waveform'),
+            innerColor: '#3F51B5'
         });
 
         $timeout(function() {
             AudioPlayer.setAudioVisualisationFallback(function(data) {
-                console.log()
                 waveform.update({
                     data: data
                 });

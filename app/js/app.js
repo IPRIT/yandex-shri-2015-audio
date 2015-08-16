@@ -4,6 +4,7 @@ angular.module('Shri', [
     'ng',
     'ngRoute',
     'ngSanitize',
+    'ngMaterial',
     'Shri.controllers',
     'Shri.services'
 ])

@@ -1,2 +1,7 @@
 <div>Works</div>
 <a href="#!/profile">Перейти</a>
+
+<input class="button" type="file" accept="audio/*" onchange="angular.element(this).scope().openFiles(event)">
+
+<md-button ng-click="play()" class="md-primary">Play</md-button>
+<md-button ng-click="pause()" class="md-accent">Pause</md-button>

@@ -1,0 +1,21 @@
+{
+  "name": "Yandex-Shri-2015-Audio-Player",
+  "version": "0.0.1",
+  "authors": [
+    "Aleksandr Belov <ipritoflex@yandex.ru>"
+  ],
+  "description": "Audio player",
+  "keywords": [
+    "webaudio",
+    "api"
+  ],
+  "ignore": [
+    "app/bower_components"
+  ],
+  "dependencies": {
+    "angular-sanitize": "~1.4.4",
+    "angular-route": "~1.4.4",
+    "angular-material": "~0.10.1",
+    "id3": "~1.0.2"
+  }
+}

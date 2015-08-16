@@ -1,0 +1,61 @@
+<div class="page">
+    <md-content class="header header_fixed">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <md-button class="md-icon-button" aria-label="Settings" ng-href="#!/">
+                    <md-icon md-svg-icon="app/img/icons/ic_audiotrack_48px.svg" style="color: white;"></md-icon>
+                </md-button>
+                <h2 style="color: white;">
+                    <span>Аудио Плеер</span>
+                </h2>
+                <span flex></span>
+                <!--<md-button class="md-icon-button" aria-label="Favorite">
+                    <md-icon md-svg-icon="app/img/icons/ic_my_library_music_48px.svg" style="color: white;"></md-icon>
+                </md-button>-->
+            </div>
+        </md-toolbar>
+    </md-content>
+    <div class="page__inner">
+        <div class="dropzone" droppable ng-show="tracks.length == 0 && !loading">
+            <input hidden type="file" multiple id="files_input" accept="audio/*" onchange="angular.element(this).scope().openFiles(event)">
+            <div class="dropzone__center">
+                <div class="dropzone__image">
+                    <div class="dropzone__image-src">
+                        <md-icon md-svg-icon="app/img/icons/ic_audiotrack_48px.svg" style="color: white;"></md-icon>
+                    </div>
+                    <div class="dropzone__message">Перетащите сюда Вашу музыку</div>
+                </div>
+            </div>
+        </div>
+        <div class="tracks" ng-show="tracks.length > 0">
+            <div class="tracks__inner">
+                <md-button class="track" ng-click="playTrack(track, $event)" ng-repeat="track in tracks">
+                    <div class="track__name">{{track.name}}</div>
+                    <div class="track__artist">{{track.artist}}</div>
+                </md-button>
+            </div>
+        </div>
+    </div>
+    <div class="player" ng-show="playing">
+        <div class="player__inner">
+            <div class="player__overlay">
+                <div class="player__waveform"></div>
+            </div>
+            <div class="player__inner-track">
+                <div class="player__controls" ng-switch="curState">
+                    <div class="player__play" ng-switch-when="stopped">
+                        <md-button class="md-icon-button player__play-button" aria-label="Play" ng-click="play()">
+                            <md-icon md-svg-icon="app/img/icons/ic_play_arrow_48px.svg" style="color: #777;"></md-icon>
+                        </md-button>
+                    </div>
+                    <div class="player__pause" ng-switch-default>
+                        <md-button class="md-icon-button player__pause-button" aria-label="Pause" ng-click="pause()">
+                            <md-icon md-svg-icon="app/img/icons/ic_pause_48px.svg" style="color: #777;"></md-icon>
+                        </md-button>
+                    </div>
+                </div>
+                <div class="player__cur-track" ng-bind="curTrack.name"></div>
+            </div>
+        </div>
+    </div>
+</div>

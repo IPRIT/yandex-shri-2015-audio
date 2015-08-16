@@ -45,12 +45,14 @@ textarea {
     box-sizing: border-box;
 }
 .page__inner {
-    padding: 64px 0 0;
     min-height: 100%;
     background-color: #E9E9E9;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+}
+.page__content {
+    min-height: 100%;
 }
 .header_fixed {
     position: fixed;
@@ -74,7 +76,7 @@ textarea {
     height: 200px;
     width: 200px;
     margin: 0 auto;
-    padding-top: 100px;
+    padding-top: 164px;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -130,6 +132,7 @@ textarea {
     max-width: 900px;
     background: #FFF;
     border-radius: 3px;
+    padding: 64px 0 0;
 }
 .track {
     text-transform: none;
@@ -292,4 +295,65 @@ textarea {
     -ms-transform: scale(1.05);
     -o-transform: scale(1.05);
     transform: scale(1.05);
+}
+
+/*
+  We're using CSS transitions for when
+  the enter and move events are triggered
+  for the element that has the .repeated-item
+  class
+*/
+.repeated-item.ng-enter, .repeated-item.ng-move {
+    -webkit-transition: 0.5s linear all;
+    -moz-transition: 0.5s linear all;
+    -o-transition: 0.5s linear all;
+    transition: 0.5s linear all;
+    opacity: 0;
+}
+
+/*
+ The ng-enter-active and ng-move-active
+ are where the transition destination properties
+ are set so that the animation knows what to
+ animate.
+*/
+.repeated-item.ng-enter.ng-enter-active,
+.repeated-item.ng-move.ng-move-active {
+    opacity: 1;
+}
+
+/*
+  We're using CSS keyframe animations for when
+  the leave event is triggered for the element
+  that has the .repeated-item class
+*/
+.repeated-item.ng-leave {
+    -webkit-animation: 0.5s my_animation;
+    -moz-animation: 0.5s my_animation;
+    -o-animation: 0.5s my_animation;
+    animation: 0.5s my_animation;
+}
+
+@keyframes my_animation {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/*
+  Unfortunately each browser vendor requires
+  its own definition of keyframe animation code...
+*/
+@-webkit-keyframes my_animation {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@-moz-keyframes my_animation {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@-o-keyframes my_animation {
+    from { opacity: 1; }
+    to { opacity: 0; }
 }

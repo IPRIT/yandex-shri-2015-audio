@@ -17,7 +17,7 @@ angular.module('Shri.controllers', [
         console.log('Works!');
     }])
 
-    .controller('IndexCtrl', ['$scope', '_', 'AudioPlaylists', 'AudioPlayer', 'AudioTracks', '$interval', '$timeout', function($scope, _, AudioPlaylists, AudioPlayer, AudioTracks, $interval, $timeout) {
+    .controller('IndexCtrl', ['$scope', '_', 'AudioPlaylists', 'AudioPlayer', 'AudioTracks', '$interval', '$timeout', '$mdDialog', function($scope, _, AudioPlaylists, AudioPlayer, AudioTracks, $interval, $timeout, $mdDialog) {
         $interval(function() {
             return $scope;
         }, 10);
@@ -28,10 +28,22 @@ angular.module('Shri.controllers', [
 
         $scope.tracks = [];
         $scope.loading = false;
+        $scope.changing = false;
         $scope.playing = false;
         $scope.curTrack = null;
         $scope.curState = 'stopped';
         $scope.curPanelState = 'hidden';
+        $scope.trackIndex = 0;
+        $scope.isLoop = false;
+
+        $timeout(function() {
+            $scope.isLoop = AudioPlayer.isLoop();
+        }, 100);
+
+        $scope.toggleLoop = function() {
+            AudioPlayer.toggleLoop();
+            $scope.isLoop = !$scope.isLoop;
+        };
 
         $scope.openFiles = function(e, flag) {
             var node,
@@ -74,19 +86,30 @@ angular.module('Shri.controllers', [
         };
 
         $scope.playTrack = function(track, e) {
+            if ($scope.changing) {
+                return;
+            }
             $scope.curPanelState = 'opened';
             if ($scope.curTrack && $scope.curTrack.id === track.id) {
                 $scope.curState === 'playing'
                     ? $scope.pause() : $scope.play();
                 return;
             }
+            $scope.changing = true;
             $scope.playing = true;
             $scope.curTrack = track;
             $scope.curState = 'stopped';
             $scope.loading = true;
 
+            for (var i = 0; i < $scope.tracks.length; ++i) {
+                if ($scope.tracks[i].id === track.id) {
+                    $scope.trackIndex = i;
+                }
+            }
+
             AudioPlayer.setTrack(track, function() {
                 AudioPlayer.play();
+                $scope.changing = false;
                 $scope.curState = AudioPlayer.getCurPlayerState();
                 $scope.loading = false;
                 $scope.playing = true;
@@ -103,6 +126,44 @@ angular.module('Shri.controllers', [
             AudioPlayer.pause(true);
         };
 
+        $scope.openEqualizer = function(ev) {
+            $mdDialog.show({
+                controller: 'EqualizerCtrl',
+                templateUrl: templateUrl('modals', 'settings'),
+                parent: angular.element(document.body),
+                targetEvent: ev,
+                clickOutsideToClose: true
+            })
+        };
+
+        $scope.deleteTrack = function(track, e) {
+            console.log($scope.tracks);
+            if ($scope.curTrack && $scope.curTrack.id === track.id) {
+                AudioPlayer.pause(true);
+                $scope.curTrack = null;
+                $scope.curPanelState = 'closed';
+            }
+            for (var i = 0; i < $scope.tracks.length; ++i) {
+                if ($scope.tracks[i].id === track.id) {
+                    $scope.tracks.splice(i, 1);
+                    break;
+                }
+            }
+        };
+
+        $scope.$on('track_ended', function(e, arg) {
+            $scope.curTrack = null;
+            if ($scope.trackIndex >= $scope.tracks.length - 1 && !AudioPlayer.isLoop()) {
+                return;
+            }
+            if (!AudioPlayer.isLoop()) {
+                $scope.trackIndex++;
+            }
+            $timeout(function() {
+                $scope.playTrack($scope.tracks[$scope.trackIndex]);
+            }, 100);
+        });
+
         var waveform = new Waveform({
             container: document.querySelector('.player__waveform'),
             innerColor: '#3F51B5'
@@ -115,5 +176,33 @@ angular.module('Shri.controllers', [
                 });
             });
         }, 1000);
+    }])
+
+    .controller('EqualizerCtrl', ['$scope', '$mdDialog', 'AudioPlayer', '_', function($scope, $mdDialog, AudioPlayer, _) {
+
+        var availableFilters = AudioPlayer.getAvailableFilters(),
+            filters = [];
+        for (var el in availableFilters) {
+            filters.push({
+                id: el,
+                name: _('filter_' + el + '_raw')
+            });
+        }
+
+        $scope.filters = filters;
+        $scope.curFilter = AudioPlayer.getSettings().filter;
+
+        $scope.save = function() {
+            $mdDialog.hide();
+        };
+
+        $scope.closeWindow = function() {
+            $mdDialog.hide();
+        };
+
+        $scope.selectFilter = function(filter) {
+            $scope.curFilter = filter.id;
+            AudioPlayer.setFilter(filter.id);
+        };
     }])
 ;

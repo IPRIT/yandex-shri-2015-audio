@@ -269,11 +269,11 @@ angular.module('Shri.services', [
         }
     }])
 
-    .service('AudioPlayer', ['Storage', '$q', '$mdDialog', '_', function(Storage, $q, $mdDialog, _) {
-        //source -> biquadFilter -> analyser -> gain -> dest
+    .service('AudioPlayer', ['Storage', '$q', '$mdDialog', '_', '$rootScope', function(Storage, $q, $mdDialog, _, $rootScope) {
+        //source -> filter -> analyser -> gain -> dest
         var audioContext,
             sourceNode,
-            biquadfilterNode,
+            filterNodes,
             analyserNode,
             gainNode,
 
@@ -288,6 +288,7 @@ angular.module('Shri.services', [
 
             curPlayerState = 'stopped',
             fileLoading = false,
+            trackChanging = false,
 
             fadeInterval,
             fadeTimeout = 30,
@@ -304,6 +305,7 @@ angular.module('Shri.services', [
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
             sourceNode = audioContext.createBufferSource();
+            sourceNode.onended = onBufferEnded;
 
             gainNode = audioContext.createGain();
 
@@ -321,19 +323,14 @@ angular.module('Shri.services', [
                 visualizerFallback(fFrequencyData);
             }, defaultVisualizerTimeout);
 
-            biquadfilterNode = audioContext.createBiquadFilter();
-            biquadfilterNode.type = 'highpass';
-            biquadfilterNode.frequency.value = 135;
-            biquadfilterNode.frequency.Q = 2.81;
-
-            sourceNode.connect(biquadfilterNode);
-            biquadfilterNode.connect(analyserNode);
+            sourceNode.connect(analyserNode);
             analyserNode.connect(gainNode);
             gainNode.connect(audioContext.destination);
 
             getSettings().then(function() {
                 gainNode.gain.value = settings.curVolume || 1;
-                sourceNode.loop = settings.loop;
+                sourceNode.loop = !!settings.loop;
+                applyFilter(settings.filter || 'normal');
                 inited = true;
                 console.log('Audio Service has been initialized.');
             });
@@ -358,7 +355,8 @@ angular.module('Shri.services', [
                 if (!audioSettings) {
                     settings = {
                         curVolume: 1.0,
-                        loop: false
+                        loop: false,
+                        filter: 'normal'
                     };
                     return saveSettings().then(function() {
                         deferred.resolve(settings);
@@ -382,12 +380,15 @@ angular.module('Shri.services', [
         }
 
         function changeTrack(track, callback) {
+            if (trackChanging) {
+                return;
+            }
             var stopped = false;
-            console.log(curPlayerState);
             if (curPlayerState === 'playing') {
                 pause(true);
                 stopped = true;
             }
+            trackChanging = true;
             switchTrack(curTrack, track, stopped, callback);
         }
 
@@ -395,23 +396,31 @@ angular.module('Shri.services', [
             var audioBuffer = newTrack.audioBuffer;
             if (!audioBuffer) {
                 if (!newTrack.arrayBuffer) {
+                    trackChanging = false;
                     afterPlaying && play(true);
                     if (callback) {
                         callback();
                     }
                     return;
                 }
+
                 fileLoading = true;
                 audioContext.decodeAudioData(newTrack.arrayBuffer, function(buffer) {
                     pause(true);
                     fileLoading = false;
+
+                    sourceNode.disconnect();
                     sourceNode = audioContext.createBufferSource();
+                    sourceNode.onended = onBufferEnded;
                     sourceNode.buffer = buffer;
-                    sourceNode.connect(biquadfilterNode);
+                    sourceNode.connect(filterNodes[0]);
+
                     newTrack.audioBuffer = buffer;
                     newTrack.arrayBuffer = null;
+
                     curTrack = newTrack;
                     curOffsetTime = 0;
+                    trackChanging = false;
 
                     if (afterPlaying) {
                         play(true);
@@ -434,11 +443,15 @@ angular.module('Shri.services', [
                     }
                 });
             } else {
+                sourceNode.disconnect();
                 sourceNode = audioContext.createBufferSource();
+                sourceNode.onended = onBufferEnded;
                 sourceNode.buffer = newTrack.audioBuffer;
-                sourceNode.connect(biquadfilterNode);
+                sourceNode.connect(filterNodes[0]);
+
                 curTrack = newTrack;
                 curOffsetTime = 0;
+                trackChanging = false;
 
                 if (callback) {
                     callback();
@@ -447,7 +460,8 @@ angular.module('Shri.services', [
         }
 
         function play(immediately) {
-            if (curPlayerState !== 'stopped' && !fadeInterval || !curTrack || fileLoading) {
+            if ((curPlayerState !== 'stopped' && !fadeInterval || !curTrack
+                || fileLoading || trackChanging)) {
                 return;
             }
 
@@ -476,10 +490,15 @@ angular.module('Shri.services', [
             }
 
             function playFunc() {
+                if (trackChanging || fileLoading) {
+                    return;
+                }
                 startOffsetTime = audioContext.currentTime;
+                sourceNode.disconnect();
                 sourceNode = audioContext.createBufferSource();
+                sourceNode.onended = onBufferEnded;
                 sourceNode.buffer = curTrack.audioBuffer;
-                sourceNode.connect(biquadfilterNode);
+                sourceNode.connect(filterNodes[0]);
                 sourceNode.start(0, curOffsetTime);
                 curPlayerState = 'playing';
                 console.log('Audio Player: playing', curTrack);
@@ -535,8 +554,15 @@ angular.module('Shri.services', [
             saveSettings();
         }
 
+        function setFilter(filterName) {
+            settings.filter = filterName;
+            saveSettings();
+            applyFilter(filterName);
+        }
+
         function toggleLoop(force) {
             settings.loop = force || !settings.loop;
+            saveSettings();
         }
 
         function getOffsetTime() {
@@ -555,6 +581,79 @@ angular.module('Shri.services', [
             return curPlayerState;
         }
 
+        function getAvailableFilters() {
+            return {
+                classic: [
+                    {f: 60, Q: 1, gain: 0, type: 'peaking'}, {f: 170, Q: 1, gain: 0, type: 'peaking'},
+                    {f: 310, Q: 1, gain: 0, type: 'peaking'}, {f: 600, Q: 1, gain: 0, type: 'peaking'},
+                    {f: 1000, Q: 1, gain: 0, type: 'peaking'}, {f: 3000, Q: 1, gain: 0, type: 'peaking'},
+                    {f: 6000, Q: 1, gain: -4, type: 'peaking'}, {f: 12000, Q: 1, gain: -4, type: 'peaking'},
+                    {f: 14000, Q: 1, gain: -4, type: 'peaking'}, {f: 16000, Q: 1, gain: -4, type: 'peaking'}
+                ],
+                pop: [
+                    {f: 60, Q: 1, gain: 0, type: 'peaking'}, {f: 170, Q: 1, gain: 2, type: 'peaking'},
+                    {f: 310, Q: 1, gain: 4, type: 'peaking'}, {f: 600, Q: 1, gain: 5, type: 'peaking'},
+                    {f: 1000, Q: 1, gain: 3, type: 'peaking'}, {f: 3000, Q: 1, gain: 0, type: 'peaking'},
+                    {f: 6000, Q: 1, gain: 0, type: 'peaking'}, {f: 12000, Q: 1, gain: 0, type: 'peaking'},
+                    {f: 14000, Q: 1, gain: 1, type: 'peaking'}, {f: 16000, Q: 1, gain: 0, type: 'peaking'}
+                ],
+                rock: [
+                    {f: 60, Q: 1, gain: 4, type: 'peaking'}, {f: 170, Q: 1, gain: 2, type: 'peaking'},
+                    {f: 310, Q: 1, gain: -2, type: 'peaking'}, {f: 600, Q: 1, gain: -5, type: 'peaking'},
+                    {f: 1000, Q: 1, gain: -1, type: 'peaking'}, {f: 3000, Q: 1, gain: 2, type: 'peaking'},
+                    {f: 6000, Q: 1, gain: 4, type: 'peaking'}, {f: 12000, Q: 1, gain: 6, type: 'peaking'},
+                    {f: 14000, Q: 1, gain: 6, type: 'peaking'}, {f: 16000, Q: 1, gain: 5.8, type: 'peaking'}
+                ],
+                jazz: [
+                    {f: 60, Q: 1, gain: 2, type: 'peaking'}, {f: 170, Q: 1, gain: 0, type: 'peaking'},
+                    {f: 310, Q: 1, gain: -1, type: 'peaking'}, {f: 600, Q: 1, gain: -1, type: 'peaking'},
+                    {f: 1000, Q: 1, gain: 0, type: 'peaking'}, {f: 3000, Q: 1, gain: 2, type: 'peaking'},
+                    {f: 6000, Q: 1, gain: 4, type: 'peaking'}, {f: 12000, Q: 1, gain: 5, type: 'peaking'},
+                    {f: 14000, Q: 1, gain: 6, type: 'peaking'}, {f: 16000, Q: 1, gain: 7, type: 'peaking'}
+                ],
+                normal: [
+                    {f: 60, Q: 1, gain: 0, type: 'peaking'}, {f: 170, Q: 1, gain: 0, type: 'peaking'},
+                    {f: 310, Q: 1, gain: 0, type: 'peaking'}, {f: 600, Q: 1, gain: 0, type: 'peaking'},
+                    {f: 1000, Q: 1, gain: 0, type: 'peaking'}, {f: 3000, Q: 1, gain: 0, type: 'peaking'},
+                    {f: 6000, Q: 1, gain: 0, type: 'peaking'}, {f: 12000, Q: 1, gain: 0, type: 'peaking'},
+                    {f: 14000, Q: 1, gain: 0, type: 'peaking'}, {f: 16000, Q: 1, gain: 0, type: 'peaking'}
+                ]
+            };
+        }
+
+        function applyFilter(filter) {
+            var selectedFilter = getAvailableFilters()[filter];
+            if (!Array.isArray(selectedFilter)) {
+                return;
+            }
+
+            function createFilter(filterParticle) {
+                var filter = audioContext.createBiquadFilter();
+                filter.type = filterParticle.type;
+                filter.frequency.value = filterParticle.f;
+                filter.frequency.Q = filterParticle.Q;
+                filter.gain.value = filterParticle.gain;
+                return filter;
+            }
+
+            var filters = selectedFilter.map(createFilter);
+            filters.reduce(function(prevNode, curNode) {
+                prevNode.connect(curNode);
+                return curNode;
+            });
+
+            filterNodes = filters;
+            sourceNode.disconnect();
+            sourceNode.connect(filterNodes[0]);
+            filterNodes[filterNodes.length - 1].connect(analyserNode);
+        }
+
+        function onBufferEnded() {
+            $rootScope.$broadcast('track_ended', {
+                track: curTrack
+            });
+        }
+
         return {
             setAudioVisualisationFallback: setAudioVisualisationFallback,
             setTrack: changeTrack,
@@ -567,7 +666,9 @@ angular.module('Shri.services', [
             getOffsetTime: getOffsetTime,
             isLoop: isLoop,
             getCurTrack: getCurTrack,
-            getCurPlayerState: getCurPlayerState
+            getCurPlayerState: getCurPlayerState,
+            getAvailableFilters: getAvailableFilters,
+            setFilter: setFilter
         };
     }])
 
@@ -631,7 +732,7 @@ angular.module('Shri.services', [
                             .clickOutsideToClose(true)
                             .title(_('file_not_found_raw'))
                             .content(_('file_not_found_error_raw'))
-                            .ariaLabel('Alert Dialog Demo')
+                            .ariaLabel('Alert Dialog')
                             .ok(_('close_button_text'))
                     );
                     break;
@@ -642,7 +743,7 @@ angular.module('Shri.services', [
                             .clickOutsideToClose(true)
                             .title(_('file_not_found_raw'))
                             .content(_('file_not_readable_error_raw'))
-                            .ariaLabel('Alert Dialog Demo')
+                            .ariaLabel('Alert Dialog')
                             .ok(_('close_button_text_raw'))
                     );
                     break;
@@ -655,7 +756,7 @@ angular.module('Shri.services', [
                             .clickOutsideToClose(true)
                             .title(_('file_not_found_raw'))
                             .content(_('unknown_error_content_raw'))
-                            .ariaLabel('Alert Dialog Demo')
+                            .ariaLabel('Alert Dialog')
                             .ok(_('close_button_text_raw'))
                     );
             }

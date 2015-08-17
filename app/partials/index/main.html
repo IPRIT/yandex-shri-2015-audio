@@ -2,16 +2,13 @@
     <md-content class="header header_fixed">
         <md-toolbar>
             <div class="md-toolbar-tools">
-                <md-button class="md-icon-button" aria-label="Settings" ng-href="#!/">
+                <md-button class="md-icon-button" aria-label="Audio" ng-href="#!/">
                     <md-icon md-svg-icon="app/img/icons/ic_audiotrack_48px.svg" style="color: white;"></md-icon>
                 </md-button>
                 <h2 style="color: white;">
                     <span shri-i18n="app_name_short">Аудио Плеер</span>
                 </h2>
                 <span flex></span>
-                <!--<md-button class="md-icon-button" aria-label="Favorite">
-                    <md-icon md-svg-icon="app/img/icons/ic_my_library_music_48px.svg" style="color: white;"></md-icon>
-                </md-button>-->
             </div>
         </md-toolbar>
     </md-content>
@@ -32,13 +29,30 @@
             </div>
             <div class="tracks" ng-show="tracks.length > 0">
                 <div class="tracks__inner" ng-class="{'tracks__inner_offset': curPanelState === 'opened' && tracks.length > 4}">
-                    <md-button class="track repeated-item" md-ripple-size="partial" ng-click="playTrack(track, $event)" ng-repeat="track in tracks">
-                        <div class="track__name">{{track.name}}</div>
-                        <div class="track__artist">{{track.artist}}</div>
-                        <div class="track__spinner" ng-show="track.id == curTrack.id && loading">
-                            <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+                    <div class="track-wrapper repeated-item" ng-repeat="track in tracks">
+                        <md-button class="track" md-ripple-size="partial" ng-click="playTrack(track, $event)">
+                            <div class="track__name">{{track.name}}</div>
+                            <div class="track__artist">{{track.artist}}</div>
+                            <div class="track__spinner" ng-show="track.id == curTrack.id && loading">
+                                <md-progress-circular md-mode="indeterminate" class="progress-circular__small"></md-progress-circular>
+                            </div>
+                        </md-button>
+                        <div class="track__menu">
+                            <md-menu onclick="event.cancelBubble = true;">
+                                <md-button aria-label="Open phone interactions menu" class="md-icon-button" ng-click="$mdOpenMenu($event)">
+                                    <md-icon md-menu-origin md-svg-icon="app/img/icons/ic_more_vert_48px.svg" style="color: #555;"></md-icon>
+                                </md-button>
+                                <md-menu-content width="4">
+                                    <md-menu-item>
+                                        <md-button ng-click="deleteTrack(track, $event)">
+                                            <md-icon md-svg-icon="app/img/icons/ic_delete_48px.svg" style="color: #555;"></md-icon>
+                                            <span shri-i18n="delete_track"></span>
+                                        </md-button>
+                                    </md-menu-item>
+                                </md-menu-content>
+                            </md-menu>
                         </div>
-                    </md-button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -62,6 +76,16 @@
                     </div>
                 </div>
                 <div class="player__cur-track" ng-bind="curTrack.name"></div>
+                <div class="player__repeat" ng-class="{'player__repeat_pressed': isLoop}">
+                    <md-button class="md-icon-button" aria-label="Repeat button" ng-click="toggleLoop($event)">
+                        <md-icon md-svg-icon="app/img/icons/ic_repeat_48px.svg" style="color: #777;"></md-icon>
+                    </md-button>
+                </div>
+                <div class="player__equalizer">
+                    <md-button class="md-icon-button" aria-label="Equalizer" ng-click="openEqualizer($event)">
+                        <md-icon md-svg-icon="app/img/icons/ic_equalizer_48px.svg" style="color: #777;"></md-icon>
+                    </md-button>
+                </div>
             </div>
         </div>
     </div>

@@ -12,5 +12,17 @@
   "try_force": "Попробовать все равно",
   "draggable_message": "Перетащите сюда Вашу любимую музыку",
   "draggable_message_could_drop": "Уже можно отпускать",
+  "add_to_playlist": "Добавить в плейлист",
+  "delete_track": "Удалить трек",
+  "filter_classic": "Классическая музыка",
+  "filter_club": "Клубная музыка",
+  "filter_dance": "Танцевальная музыка",
+  "filter_gainlowpass": "Усиление НЧ",
+  "filter_gainlowandhighpass": "Усиление НЧ и ВЧ",
+  "filter_gainhighpass": "Усиление ВЧ",
+  "filter_pop": "Поп",
+  "filter_rock": "Рок",
+  "filter_jazz": "Джаз",
+  "filter_normal": "По умолчанию",
   "opera_error": "Похоже, Ваш браузер - Opera. Для данного браузера замечено странное поведение функции decodeAudioData. Ваша музыка, возможно, воспроизводиться не будет. Описание проблемы: Браузер не выдает исключение, после вызова функции decodeAudioData. Похожая проблема: http://stackoverflow.com/questions/10365335/decodeaudiodata-returning-a-null-error"
 }

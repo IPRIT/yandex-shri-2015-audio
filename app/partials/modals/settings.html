@@ -1,0 +1,30 @@
+<md-dialog aria-label="Equalizer">
+    <form>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Выберите фильтр</h2>
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="closeWindow('not applicable')">
+                    <md-icon md-svg-src="app/img/icons/ic_close_48px.svg" aria-label="Close dialog"></md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+        <md-dialog-content style="max-width: 800px; max-height: 810px; ">
+            <div>
+                <div layout="row" layout-wrap>
+                    <div flex="50" ng-repeat="filter in filters">
+                        <md-checkbox ng-checked="filter.id === curFilter" ng-click="selectFilter(filter)">
+                            {{ filter.name }}
+                        </md-checkbox>
+                    </div>
+                </div>
+            </div>
+        </md-dialog-content>
+        <div class="md-actions" layout="row">
+            <span flex></span>
+            <md-button ng-click="save()" style="margin-right: 20px;">
+                Сохранить
+            </md-button>
+        </div>
+    </form>
+</md-dialog>

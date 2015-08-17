@@ -198,12 +198,12 @@ textarea {
 .player__play, .player__pause {
     cursor: pointer;
 }
-.player__play button, .player__pause button {
+.player__play button, .player__pause button, .player__equalizer button, .player__repeat button {
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.5);
     overflow: visible;
 }
-.player__play button:hover, .player__pause button:hover {
+.player__play button:hover, .player__pause button:hover, .player__equalizer button:hover, .player__repeat button:hover {
     background: rgba(255, 255, 255, 0.6) !important;
     overflow: visible;
 }
@@ -219,9 +219,9 @@ textarea {
 }
 .track__spinner {
     position: absolute;
-    height: 100%;
-    top: 24%;
-    right: 23px;
+    height: 48px;
+    bottom: 4px;
+    right: 10px;
 }
 .tracks__inner_offset {
     padding-bottom: 100px;
@@ -296,13 +296,6 @@ textarea {
     -o-transform: scale(1.05);
     transform: scale(1.05);
 }
-
-/*
-  We're using CSS transitions for when
-  the enter and move events are triggered
-  for the element that has the .repeated-item
-  class
-*/
 .repeated-item.ng-enter, .repeated-item.ng-move {
     -webkit-transition: 0.5s linear all;
     -moz-transition: 0.5s linear all;
@@ -310,50 +303,54 @@ textarea {
     transition: 0.5s linear all;
     opacity: 0;
 }
-
-/*
- The ng-enter-active and ng-move-active
- are where the transition destination properties
- are set so that the animation knows what to
- animate.
-*/
 .repeated-item.ng-enter.ng-enter-active,
 .repeated-item.ng-move.ng-move-active {
     opacity: 1;
 }
-
-/*
-  We're using CSS keyframe animations for when
-  the leave event is triggered for the element
-  that has the .repeated-item class
-*/
 .repeated-item.ng-leave {
     -webkit-animation: 0.5s my_animation;
     -moz-animation: 0.5s my_animation;
     -o-animation: 0.5s my_animation;
     animation: 0.5s my_animation;
 }
-
 @keyframes my_animation {
     from { opacity: 1; }
     to { opacity: 0; }
 }
-
-/*
-  Unfortunately each browser vendor requires
-  its own definition of keyframe animation code...
-*/
 @-webkit-keyframes my_animation {
     from { opacity: 1; }
     to { opacity: 0; }
 }
-
 @-moz-keyframes my_animation {
     from { opacity: 1; }
     to { opacity: 0; }
 }
-
 @-o-keyframes my_animation {
     from { opacity: 1; }
     to { opacity: 0; }
+}
+.track__menu {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+}
+.track-wrapper {
+    position: relative;
+}
+.progress-circular__small {
+    transform: scale(0.4) !important;
+    -webkit-transform: scale(0.4) !important;
+}
+.player__equalizer {
+    position: absolute;
+    top: 19px;
+    right: 10px;
+}
+.player__repeat {
+    position: absolute;
+    top: 19px;
+    right: 72px;
+}
+.player__repeat_pressed md-icon {
+    color: #0b97c4 !important;
 }

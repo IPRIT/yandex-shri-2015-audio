@@ -232,7 +232,7 @@ textarea {
     -ms-transition: bottom .1s ease-out;
     -o-transition: bottom .1s ease-out;
     transition: bottom .1s ease-out;
-    bottom: -80px;
+    bottom: -90px;
 }
 .player_state_opened {
     bottom: 0;

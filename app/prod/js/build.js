@@ -922,7 +922,6 @@ var Waveform = (function() {
     var barWidth = (this.context.canvas.offsetWidth / bufferLength) * 2.5;
     var barHeight;
     var x = -100;
-    console.log(this.data);
 
     for (var i = 0; i < bufferLength; i++) {
       barHeight = this.data[i] / 2.0;
@@ -1307,7 +1306,7 @@ angular.module('Shri.services', [
 
             decodeQueue = [],
             curDecodingAudio = 0,
-            simultaneousDecodingLimit = 7,
+            simultaneousDecodingLimit = 5,
             curDecodedTracks = 0,
             decodingLimitTracks = 10;
 

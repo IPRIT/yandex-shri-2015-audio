@@ -76,7 +76,7 @@
                     <div class="player__play" ng-switch-when="stopped">
                         <md-button class="md-icon-button player__play-button" aria-label="Play" ng-click="play()">
                             <md-tooltip md-direction="top">
-                                Играть
+                                <span shri-i18n="play"></span>
                             </md-tooltip>
                             <md-icon md-svg-icon="app/img/icons/ic_play_arrow_48px.svg" style="color: #777;"></md-icon>
                         </md-button>
@@ -84,7 +84,7 @@
                     <div class="player__pause" ng-switch-default>
                         <md-button class="md-icon-button player__pause-button" aria-label="Pause" ng-click="pause()">
                             <md-tooltip md-direction="top">
-                                Пауза
+                                <span shri-i18n="pause"></span>
                             </md-tooltip>
                             <md-icon md-svg-icon="app/img/icons/ic_pause_48px.svg" style="color: #777;"></md-icon>
                         </md-button>
@@ -94,7 +94,7 @@
                 <div class="player__repeat" ng-class="{'player__repeat_pressed': isLoop}">
                     <md-button class="md-icon-button" aria-label="Repeat button" ng-click="toggleLoop($event)">
                         <md-tooltip md-direction="top">
-                            Повторять
+                            <span shri-i18n="repeat"></span>
                         </md-tooltip>
                         <md-icon md-svg-icon="app/img/icons/ic_repeat_48px.svg" style="color: #777;"></md-icon>
                     </md-button>
@@ -102,7 +102,7 @@
                 <div class="player__equalizer">
                     <md-button class="md-icon-button" aria-label="Equalizer" ng-click="openEqualizer($event)">
                         <md-tooltip md-direction="top">
-                            Применить фильтр
+                            <span shri-i18n="filter"></span>
                         </md-tooltip>
                         <md-icon md-svg-icon="app/img/icons/ic_equalizer_48px.svg" style="color: #777;"></md-icon>
                     </md-button>

@@ -24,5 +24,9 @@
   "filter_rock": "Рок",
   "filter_jazz": "Джаз",
   "filter_normal": "По умолчанию",
+  "filter": "Применить фильтр",
+  "play": "Играть",
+  "pause": "Пауза",
+  "repeat": "Повторять",
   "opera_error": "Похоже, Ваш браузер - Opera. Для данного браузера замечено странное поведение функции decodeAudioData. Ваша музыка, возможно, воспроизводиться не будет. Описание проблемы: Браузер не выдает исключение, после вызова функции decodeAudioData. Похожая проблема: http://stackoverflow.com/questions/10365335/decodeaudiodata-returning-a-null-error"
 }

@@ -166,7 +166,8 @@ textarea {
     z-index: 501;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.2);
+    white-space: nowrap;
+    background-color: rgba(255, 255, 255, 0.5);
     box-sizing: border-box;
     -webkit-transition: background-color 5s ease-out;
     -moz-transition: background-color 5s ease-out;
@@ -181,7 +182,7 @@ textarea {
     position: fixed;
     bottom: 0;
     width: 100%;
-    z-index: 999;
+    z-index: 100;
 }
 .player__cur-track, .player__controls {
     display: inline-block;
@@ -209,9 +210,9 @@ textarea {
 }
 .player__waveform {
     height: 100%;
-    -webkit-filter: blur(7px);
-    filter: blur(7px);
-    -moz-filter: blur(7px);
+    -webkit-filter: blur(3px);
+    filter: blur(3px);
+    -moz-filter: blur(3px);
     padding: 5px 0 5px;
 }
 .dropzone__image:active {
@@ -232,7 +233,7 @@ textarea {
     -ms-transition: bottom .1s ease-out;
     -o-transition: bottom .1s ease-out;
     transition: bottom .1s ease-out;
-    bottom: -80px;
+    bottom: -90px;
 }
 .player_state_opened {
     bottom: 0;
@@ -353,4 +354,28 @@ textarea {
 }
 .player__repeat_pressed md-icon {
     color: #0b97c4 !important;
+}
+.track__ready {
+    position: absolute;
+    height: 48px;
+    bottom: -1px;
+    right: 21px;
+}
+.track__info, .track__state {
+    display: inline-block;
+    vertical-align: top;
+}
+.track__state {
+    width: 0;
+    opacity: 0;
+    margin-top: 15px;
+    -webkit-transition: width .1s ease-out, opacity .1s ease-out;
+    -moz-transition: width .1s ease-out, opacity .1s ease-out;
+    -ms-transition: width .1s ease-out, opacity .1s ease-out;
+    -o-transition: width .1s ease-out, opacity .1s ease-out;
+    transition: width .1s ease-out, opacity .1s ease-out;
+}
+.track__state_type_current {
+    width: 45px;
+    opacity: 1;
 }

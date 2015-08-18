@@ -19,8 +19,9 @@ var Waveform = (function() {
     this.width = parseInt(this.context.canvas.offsetWidth, 10);
     this.height = parseInt(this.context.canvas.offsetHeight, 10);
     if (options.data) {
-      this.update(options);
+      this.setData(options.data);
     }
+    this.redraw();
   }
 
   Waveform.prototype.setData = function(data) {
@@ -35,20 +36,32 @@ var Waveform = (function() {
     return this.setData(this.expandArray(data, this.context.canvas.offsetWidth));
   };
 
+  var drawVisual = false;
   Waveform.prototype.update = function(options) {
-    if (options.interpolate != null) {
-      this.interpolate = options.interpolate;
-    }
-    if (this.interpolate === false) {
-      this.setDataCropped(options.data);
-    } else {
-      this.setDataInterpolated(options.data);
-    }
-    return this.redraw();
+    this.data = options.data;
   };
 
   Waveform.prototype.redraw = function() {
-    var d, i, middle, t, _i, _len, _ref, _results;
+    var $this = this;
+    drawVisual = requestAnimationFrame($this.redraw.bind($this));
+    var bufferLength = 256;
+    this.context.fillStyle = 'white';
+    this.context.fillRect(0, 0, this.context.canvas.offsetWidth, this.context.canvas.offsetHeight);
+
+    var barWidth = (this.context.canvas.offsetWidth / bufferLength) * 2.5;
+    var barHeight;
+    var x = -100;
+    console.log(this.data);
+
+    for (var i = 0; i < bufferLength; i++) {
+      barHeight = this.data[i] / 2.0;
+
+      this.context.fillStyle = 'rgb(' + (63) + ',81,181)';
+      this.context.fillRect(x,this.context.canvas.offsetHeight-barHeight/2,barWidth,barHeight/2);
+
+      x += barWidth + 1;
+    }
+    /*var d, i, middle, t, _i, _len, _ref, _results;
     this.clear();
     if (typeof this.innerColor === "function") {
       this.context.fillStyle = this.innerColor();
@@ -69,7 +82,7 @@ var Waveform = (function() {
       this.context.fillRect(t * i, middle - middle * d, t, middle * d * 2);
       _results.push(i++);
     }
-    return _results;
+    return _results;*/
   };
 
   Waveform.prototype.clear = function() {

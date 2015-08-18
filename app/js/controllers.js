@@ -81,6 +81,9 @@ angular.module('Shri.controllers', [
                     }
                     index++;
                     loadFile();
+                    AudioPlayer.fillAudioBuffer(track).then(function() {
+                        console.log('Successful decoded', track);
+                    });
                 });
             }
         };
@@ -130,8 +133,8 @@ angular.module('Shri.controllers', [
             $mdDialog.show({
                 controller: 'EqualizerCtrl',
                 templateUrl: templateUrl('modals', 'settings'),
-                parent: angular.element(document.body),
-                targetEvent: ev,
+                parent: angular.element(document.querySelector('.modal-layer')),
+                //targetEvent: ev,
                 clickOutsideToClose: true
             })
         };
@@ -154,6 +157,7 @@ angular.module('Shri.controllers', [
         $scope.$on('track_ended', function(e, arg) {
             $scope.curTrack = null;
             if ($scope.trackIndex >= $scope.tracks.length - 1 && !AudioPlayer.isLoop()) {
+                $scope.pause();
                 return;
             }
             if (!AudioPlayer.isLoop()) {

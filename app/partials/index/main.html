@@ -31,10 +31,19 @@
                 <div class="tracks__inner" ng-class="{'tracks__inner_offset': curPanelState === 'opened' && tracks.length > 4}">
                     <div class="track-wrapper repeated-item" ng-repeat="track in tracks">
                         <md-button class="track" md-ripple-size="partial" ng-click="playTrack(track, $event)">
-                            <div class="track__name">{{track.name}}</div>
-                            <div class="track__artist">{{track.artist}}</div>
-                            <div class="track__spinner" ng-show="track.id == curTrack.id && loading">
+                            <div class="track__state" ng-class="{'track__state_type_current': track.id === curTrack.id}" ng-switch="curState" ng-show="track.id === curTrack.id">
+                                <md-icon md-svg-icon="app/img/icons/ic_play_arrow_48px.svg" style="color: #555;" ng-switch-when="playing"></md-icon>
+                                <md-icon md-svg-icon="app/img/icons/ic_pause_48px.svg" style="color: #555;" ng-switch-when="stopped"></md-icon>
+                            </div>
+                            <div class="track__info">
+                                <div class="track__name">{{track.name}}</div>
+                                <div class="track__artist">{{track.artist}}</div>
+                            </div>
+                            <div class="track__spinner" ng-show="track.isDecoding">
                                 <md-progress-circular md-mode="indeterminate" class="progress-circular__small"></md-progress-circular>
+                            </div>
+                            <div class="track__ready" ng-show="!!track.audioBuffer">
+                                <md-icon md-svg-icon="app/img/icons/ic_done_all_48px.svg" style="color: #555;"></md-icon>
                             </div>
                         </md-button>
                         <div class="track__menu">
@@ -66,11 +75,17 @@
                 <div class="player__controls" ng-switch="curState">
                     <div class="player__play" ng-switch-when="stopped">
                         <md-button class="md-icon-button player__play-button" aria-label="Play" ng-click="play()">
+                            <md-tooltip md-direction="top">
+                                Играть
+                            </md-tooltip>
                             <md-icon md-svg-icon="app/img/icons/ic_play_arrow_48px.svg" style="color: #777;"></md-icon>
                         </md-button>
                     </div>
                     <div class="player__pause" ng-switch-default>
                         <md-button class="md-icon-button player__pause-button" aria-label="Pause" ng-click="pause()">
+                            <md-tooltip md-direction="top">
+                                Пауза
+                            </md-tooltip>
                             <md-icon md-svg-icon="app/img/icons/ic_pause_48px.svg" style="color: #777;"></md-icon>
                         </md-button>
                     </div>
@@ -78,11 +93,17 @@
                 <div class="player__cur-track" ng-bind="curTrack.name"></div>
                 <div class="player__repeat" ng-class="{'player__repeat_pressed': isLoop}">
                     <md-button class="md-icon-button" aria-label="Repeat button" ng-click="toggleLoop($event)">
+                        <md-tooltip md-direction="top">
+                            Повторять
+                        </md-tooltip>
                         <md-icon md-svg-icon="app/img/icons/ic_repeat_48px.svg" style="color: #777;"></md-icon>
                     </md-button>
                 </div>
                 <div class="player__equalizer">
                     <md-button class="md-icon-button" aria-label="Equalizer" ng-click="openEqualizer($event)">
+                        <md-tooltip md-direction="top">
+                            Применить фильтр
+                        </md-tooltip>
                         <md-icon md-svg-icon="app/img/icons/ic_equalizer_48px.svg" style="color: #777;"></md-icon>
                     </md-button>
                 </div>

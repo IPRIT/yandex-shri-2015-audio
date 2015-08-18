@@ -284,7 +284,7 @@ angular.module('Shri.services', [
 
             visualizerFallback = angular.noop,
             visualizerTimer,
-            defaultVisualizerTimeout = 50,
+            defaultVisualizerTimeout = 30,
 
             curPlayerState = 'stopped',
             fileLoading = false,
@@ -296,7 +296,13 @@ angular.module('Shri.services', [
             curOffsetTime = 0,
             startOffsetTime,
 
-            operaNitificationShowed = false;
+            operaNitificationShowed = false,
+
+            decodeQueue = [],
+            curDecodingAudio = 0,
+            simultaneousDecodingLimit = 7,
+            curDecodedTracks = 0,
+            decodingLimitTracks = 10;
 
         (function init() {
             if (inited) {
@@ -310,15 +316,16 @@ angular.module('Shri.services', [
             gainNode = audioContext.createGain();
 
             analyserNode = audioContext.createAnalyser();
-            analyserNode.fftSize = 1024;
-            var fFrequencyData = new Float32Array(analyserNode.fftSize);
+            analyserNode.fftSize = 256;
+            var fFrequencyData = new Uint8Array(analyserNode.frequencyBinCount);
             visualizerTimer = setInterval(function() {
-                if ((!inited || visualizerFallback === angular.noop) && curPlayerState === 'stopped') {
+                if ((!inited || visualizerFallback === angular.noop) || curPlayerState === 'stopped') {
                     return;
                 }
-                analyserNode.getFloatFrequencyData(fFrequencyData);
-                for (var i = 0; i < fFrequencyData.length; ++i) {
-                    fFrequencyData[i] /= 200;
+                if (curPlayerState === 'stopped') {
+                    fFrequencyData = new Uint8Array(analyserNode.frequencyBinCount);
+                } else {
+                    analyserNode.getByteFrequencyData(fFrequencyData);
                 }
                 visualizerFallback(fFrequencyData);
             }, defaultVisualizerTimeout);
@@ -405,9 +412,9 @@ angular.module('Shri.services', [
                 }
 
                 fileLoading = true;
+                newTrack.isDecoding = true;
                 audioContext.decodeAudioData(newTrack.arrayBuffer, function(buffer) {
                     pause(true);
-                    fileLoading = false;
 
                     sourceNode.disconnect();
                     sourceNode = audioContext.createBufferSource();
@@ -417,10 +424,12 @@ angular.module('Shri.services', [
 
                     newTrack.audioBuffer = buffer;
                     newTrack.arrayBuffer = null;
+                    newTrack.isDecoding = false;
 
                     curTrack = newTrack;
                     curOffsetTime = 0;
                     trackChanging = false;
+                    fileLoading = false;
 
                     if (afterPlaying) {
                         play(true);
@@ -654,6 +663,54 @@ angular.module('Shri.services', [
             });
         }
 
+        function fillAudioBuffer(track) {
+            if (!track) {
+                return;
+            }
+            var deferred = $q.defer(),
+                decodeItem = {
+                    promise: deferred,
+                    onLoaded: function() {
+                        this.promise.resolve(this.track);
+                    },
+                    track: track
+                };
+            if (curDecodingAudio >= simultaneousDecodingLimit) {
+                decodeQueue.push(decodeItem);
+            } else {
+                curDecodingAudio++;
+                decodeAudio(decodeItem);
+            }
+            return deferred.promise;
+        }
+
+        function decodeAudio(decodeItem) {
+            decodeItem.track.isDecoding = true;
+            console.log('Start decoding track', decodeItem.track);
+
+            audioContext.decodeAudioData(decodeItem.track.arrayBuffer, function(buffer) {
+                if (!decodeItem.track) {
+                    curDecodingAudio--;
+                    return;
+                }
+                if (!decodeItem.track.audioBuffer) {
+                    decodeItem.track.audioBuffer = buffer;
+                }
+                decodeItem.track.arrayBuffer = null;
+                decodeItem.track.isDecoding = false;
+                decodeItem.onLoaded();
+
+                curDecodedTracks++;
+                if (decodeQueue.length && curDecodedTracks < decodingLimitTracks) {
+                    setTimeout(function() {
+                        decodeAudio(decodeQueue.shift());
+                    }, 500);
+                } else {
+                    curDecodingAudio--;
+                }
+            });
+        }
+
         return {
             setAudioVisualisationFallback: setAudioVisualisationFallback,
             setTrack: changeTrack,
@@ -668,7 +725,8 @@ angular.module('Shri.services', [
             getCurTrack: getCurTrack,
             getCurPlayerState: getCurPlayerState,
             getAvailableFilters: getAvailableFilters,
-            setFilter: setFilter
+            setFilter: setFilter,
+            fillAudioBuffer: fillAudioBuffer
         };
     }])
 
@@ -715,7 +773,8 @@ angular.module('Shri.services', [
                         originalName: file.name,
                         photo: 'nope',
                         arrayBuffer: arrayBuffer,
-                        audioBuffer: null
+                        audioBuffer: null,
+                        isDecoding: false
                     };
                     onReady(track);
                 });

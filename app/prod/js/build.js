@@ -1694,6 +1694,7 @@ angular.module('Shri.services', [
             decodeItem.track.isDecoding = true;
             console.log('Start decoding track', decodeItem.track);
 
+            curDecodedTracks++;
             audioContext.decodeAudioData(decodeItem.track.arrayBuffer, function(buffer) {
                 if (!decodeItem.track) {
                     curDecodingAudio--;
@@ -1706,7 +1707,6 @@ angular.module('Shri.services', [
                 decodeItem.track.isDecoding = false;
                 decodeItem.onLoaded();
 
-                curDecodedTracks++;
                 if (decodeQueue.length && curDecodedTracks < decodingLimitTracks) {
                     setTimeout(function() {
                         decodeAudio(decodeQueue.shift());

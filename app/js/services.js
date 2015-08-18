@@ -319,7 +319,7 @@ angular.module('Shri.services', [
             analyserNode.fftSize = 256;
             var fFrequencyData = new Uint8Array(analyserNode.frequencyBinCount);
             visualizerTimer = setInterval(function() {
-                if ((!inited || visualizerFallback === angular.noop) || curPlayerState === 'stopped') {
+                if (!inited || visualizerFallback === angular.noop || curPlayerState === 'stopped') {
                     return;
                 }
                 if (curPlayerState === 'stopped') {
@@ -335,7 +335,7 @@ angular.module('Shri.services', [
             gainNode.connect(audioContext.destination);
 
             getSettings().then(function() {
-                gainNode.gain.value = settings.curVolume || 1;
+                gainNode.gain.value = settings.curVolume;
                 sourceNode.loop = !!settings.loop;
                 applyFilter(settings.filter || 'normal');
                 inited = true;
@@ -560,6 +560,7 @@ angular.module('Shri.services', [
 
         function setAudioVolume(volume) {
             settings.curVolume = volume;
+            gainNode.gain.value = settings.curVolume;
             saveSettings();
         }
 
@@ -575,7 +576,13 @@ angular.module('Shri.services', [
         }
 
         function getOffsetTime() {
-            return curOffsetTime;
+            return curOffsetTime + audioContext.currentTime - startOffsetTime;
+        }
+
+        function setOffsetTime(offsetTime) {
+            pause(true);
+            curOffsetTime = offsetTime;
+            play(true);
         }
 
         function isLoop() {
@@ -721,6 +728,7 @@ angular.module('Shri.services', [
             setVolume: setAudioVolume,
             toggleLoop: toggleLoop,
             getOffsetTime: getOffsetTime,
+            setOffsetTime: setOffsetTime,
             isLoop: isLoop,
             getCurTrack: getCurTrack,
             getCurPlayerState: getCurPlayerState,

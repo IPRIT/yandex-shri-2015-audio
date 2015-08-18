@@ -55,7 +55,7 @@ var Waveform = (function() {
     for (var i = 0; i < bufferLength; i++) {
       barHeight = this.data[i] / 2.0;
 
-      this.context.fillStyle = 'rgb(' + (63) + ',81,181)';
+      this.context.fillStyle = '#989898';
       this.context.fillRect(x,this.context.canvas.offsetHeight-barHeight/2,barWidth,barHeight/2);
 
       x += barWidth + 1;

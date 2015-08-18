@@ -51,7 +51,6 @@ var Waveform = (function() {
     var barWidth = (this.context.canvas.offsetWidth / bufferLength) * 2.5;
     var barHeight;
     var x = -100;
-    console.log(this.data);
 
     for (var i = 0; i < bufferLength; i++) {
       barHeight = this.data[i] / 2.0;
@@ -61,28 +60,6 @@ var Waveform = (function() {
 
       x += barWidth + 1;
     }
-    /*var d, i, middle, t, _i, _len, _ref, _results;
-    this.clear();
-    if (typeof this.innerColor === "function") {
-      this.context.fillStyle = this.innerColor();
-    } else {
-      this.context.fillStyle = this.innerColor;
-    }
-    middle = this.context.canvas.offsetHeight / 2;
-    i = 0;
-    _ref = this.data;
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      d = _ref[_i];
-      t = this.context.canvas.offsetWidth / this.data.length + 1;
-      if (typeof this.innerColor === "function") {
-        this.context.fillStyle = this.innerColor(i / this.context.canvas.offsetWidth, d);
-      }
-      this.context.clearRect(t * i, middle - middle * d, t, middle * d * 2);
-      this.context.fillRect(t * i, middle - middle * d, t, middle * d * 2);
-      _results.push(i++);
-    }
-    return _results;*/
   };
 
   Waveform.prototype.clear = function() {

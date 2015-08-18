@@ -54,7 +54,11 @@ angular.module('Shri.controllers', [
         $scope.loading = false;
         $scope.changing = false;
         $scope.playing = false;
+        $scope.isOffsetDraggable = false;
         $scope.curTrack = null;
+        $scope.curTrackTime = 0;
+        $scope.curVolume = 0.5;
+        $scope.curVolumePercent = 50;
         $scope.curState = 'stopped';
         $scope.curPanelState = 'hidden';
         $scope.trackIndex = 0;
@@ -62,7 +66,14 @@ angular.module('Shri.controllers', [
 
         $timeout(function() {
             $scope.isLoop = AudioPlayer.isLoop();
+            $scope.curVolume = AudioPlayer.getSettings().curVolume;
+            $scope.curVolumePercent = $scope.curVolume * 100;
         }, 100);
+
+        $scope.$watch('curVolumePercent', function(val) {
+            $scope.curVolume = val / 100.0;
+            AudioPlayer.setVolume($scope.curVolume);
+        });
 
         $scope.toggleLoop = function() {
             AudioPlayer.toggleLoop();
@@ -157,8 +168,7 @@ angular.module('Shri.controllers', [
             $mdDialog.show({
                 controller: 'EqualizerCtrl',
                 templateUrl: templateUrl('modals', 'settings'),
-                parent: angular.element(document.querySelector('.modal-layer')),
-                //targetEvent: ev,
+                parent: angular.element(document.body),
                 clickOutsideToClose: true
             })
         };
@@ -167,6 +177,7 @@ angular.module('Shri.controllers', [
             console.log($scope.tracks);
             if ($scope.curTrack && $scope.curTrack.id === track.id) {
                 AudioPlayer.pause(true);
+                $scope.curTrack.audioBuffer = null;
                 $scope.curTrack = null;
                 $scope.curPanelState = 'closed';
             }
@@ -176,6 +187,40 @@ angular.module('Shri.controllers', [
                     break;
                 }
             }
+        };
+
+        var startDragTime;
+        $scope.setOffsetDraggableState = function(state) {
+            startDragTime = new Date().getTime();
+            $scope.isOffsetDraggable = state;
+        };
+
+        $scope.updateTrackOffset = function(ev, moveEvent) {
+            if (!ev || !ev.offsetX || !$scope.curTrack) {
+                return;
+            }
+            if (moveEvent && (!$scope.isOffsetDraggable
+                || (new Date()).getTime() - startDragTime < 300)) {
+                return;
+            }
+            startDragTime = new Date().getTime();
+            var targetElement = ev.target;
+            while (!angular.element(targetElement).hasClass('player__position')) {
+                targetElement = targetElement.parentNode;
+            }
+            var width = targetElement.offsetWidth,
+                percentOffset = (ev.offsetX - 1) * 1.0 / width;
+            AudioPlayer.setOffsetTime($scope.curTrack.audioBuffer.duration * percentOffset);
+        };
+
+        $scope.toggleVolume = function() {
+            if ($scope.curVolume) {
+                $scope.previousVolume = $scope.curVolume;
+            }
+            $scope.curVolume = $scope.curVolume ?
+                0 : $scope.previousVolume || 1;
+            AudioPlayer.setVolume($scope.curVolume);
+            $scope.curVolumePercent = $scope.curVolume * 100;
         };
 
         $scope.$on('track_ended', function(e, arg) {
@@ -204,6 +249,13 @@ angular.module('Shri.controllers', [
                 });
             });
         }, 1000);
+
+        $interval(function() {
+            if (!$scope.curTrack || !$scope.curTrack.audioBuffer || $scope.curState === 'stopped') {
+                return;
+            }
+            $scope.curTrackTime = AudioPlayer.getOffsetTime() / $scope.curTrack.audioBuffer.duration * 100;
+        }, 20);
     }])
 
     .controller('EqualizerCtrl', ['$scope', '$mdDialog', 'AudioPlayer', '_', function($scope, $mdDialog, AudioPlayer, _) {
@@ -926,7 +978,7 @@ var Waveform = (function() {
     for (var i = 0; i < bufferLength; i++) {
       barHeight = this.data[i] / 2.0;
 
-      this.context.fillStyle = 'rgb(' + (63) + ',81,181)';
+      this.context.fillStyle = '#989898';
       this.context.fillRect(x,this.context.canvas.offsetHeight-barHeight/2,barWidth,barHeight/2);
 
       x += barWidth + 1;
@@ -1325,7 +1377,7 @@ angular.module('Shri.services', [
             analyserNode.fftSize = 256;
             var fFrequencyData = new Uint8Array(analyserNode.frequencyBinCount);
             visualizerTimer = setInterval(function() {
-                if ((!inited || visualizerFallback === angular.noop) || curPlayerState === 'stopped') {
+                if (!inited || visualizerFallback === angular.noop || curPlayerState === 'stopped') {
                     return;
                 }
                 if (curPlayerState === 'stopped') {
@@ -1341,7 +1393,7 @@ angular.module('Shri.services', [
             gainNode.connect(audioContext.destination);
 
             getSettings().then(function() {
-                gainNode.gain.value = settings.curVolume || 1;
+                gainNode.gain.value = settings.curVolume;
                 sourceNode.loop = !!settings.loop;
                 applyFilter(settings.filter || 'normal');
                 inited = true;
@@ -1566,6 +1618,7 @@ angular.module('Shri.services', [
 
         function setAudioVolume(volume) {
             settings.curVolume = volume;
+            gainNode.gain.value = settings.curVolume;
             saveSettings();
         }
 
@@ -1581,7 +1634,13 @@ angular.module('Shri.services', [
         }
 
         function getOffsetTime() {
-            return curOffsetTime;
+            return curOffsetTime + audioContext.currentTime - startOffsetTime;
+        }
+
+        function setOffsetTime(offsetTime) {
+            pause(true);
+            curOffsetTime = offsetTime;
+            play(true);
         }
 
         function isLoop() {
@@ -1727,6 +1786,7 @@ angular.module('Shri.services', [
             setVolume: setAudioVolume,
             toggleLoop: toggleLoop,
             getOffsetTime: getOffsetTime,
+            setOffsetTime: setOffsetTime,
             isLoop: isLoop,
             getCurTrack: getCurTrack,
             getCurPlayerState: getCurPlayerState,

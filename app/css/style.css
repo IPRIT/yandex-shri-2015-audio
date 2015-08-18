@@ -169,11 +169,11 @@ textarea {
     white-space: nowrap;
     background-color: rgba(255, 255, 255, 0.5);
     box-sizing: border-box;
-    -webkit-transition: background-color 5s ease-out;
-    -moz-transition: background-color 5s ease-out;
-    -ms-transition: background-color 5s ease-out;
-    -o-transition: background-color 5s ease-out;
-    transition: background-color 5s ease-in;
+    -webkit-transition: background-color 3s ease-out;
+    -moz-transition: background-color 3s ease-out;
+    -ms-transition: background-color 3s ease-out;
+    -o-transition: background-color 3s ease-out;
+    transition: background-color 3s ease-in;
 }
 .player__inner-track_type_innactive {
     background-color: #FFF;
@@ -199,12 +199,20 @@ textarea {
 .player__play, .player__pause {
     cursor: pointer;
 }
-.player__play button, .player__pause button, .player__equalizer button, .player__repeat button {
+.player__play button,
+.player__pause button,
+.player__equalizer button,
+.player__repeat button,
+.player__volume button {
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.5);
     overflow: visible;
 }
-.player__play button:hover, .player__pause button:hover, .player__equalizer button:hover, .player__repeat button:hover {
+.player__play button:hover,
+.player__pause button:hover,
+.player__equalizer button:hover,
+.player__repeat button:hover,
+.player__volume button:hover {
     background: rgba(255, 255, 255, 0.6) !important;
     overflow: visible;
 }
@@ -353,7 +361,7 @@ textarea {
     right: 72px;
 }
 .player__repeat_pressed md-icon {
-    color: #0b97c4 !important;
+    color: #3F51B5 !important;
 }
 .track__ready {
     position: absolute;
@@ -378,4 +386,56 @@ textarea {
 .track__state_type_current {
     width: 45px;
     opacity: 1;
+}
+.player__position {
+    position: absolute;
+    width: 100%;
+    top: -6px;
+    overflow: visible;
+    left: 0;
+    height: 25px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+.player__volume {
+    position: absolute;
+    top: 19px;
+    right: 134px;
+}
+.player__volume-inner {
+    background-color: rgba(255, 255, 255, 0);
+    border-radius: 30px 30px 30px 30px / 30px 30px 30px 30px;
+    width: 60px;
+    -webkit-transition: all .2s ease-out;
+    -moz-transition: all .2s ease-out;
+    -ms-transition: all .2s ease-out;
+    -o-transition: all .2s ease-out;
+    transition: all .2s ease-out;
+}
+.player__volume:hover .player__volume-inner {
+    width: 200px;
+    background-color: rgba(79, 127, 240, 0.3);
+}
+.player__volume:hover button {
+    margin: 0;
+    padding: 0;
+}
+.player__volume:hover .player__slider {
+    opacity: 1;
+    width: 112px;
+    -webkit-transition: all .2s ease-out;
+    -moz-transition: all .2s ease-out;
+    -ms-transition: all .2s ease-out;
+    -o-transition: all .2s ease-out;
+    transition: all .2s ease-out;
+}
+.player__slider {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0 10px;
+    width: 0;
+    opacity: 0;
 }

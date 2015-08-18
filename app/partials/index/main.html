@@ -72,6 +72,10 @@
                 <div class="player__waveform"></div>
             </div>
             <div class="player__inner-track" ng-class="{'player__inner-track_type_innactive': curState === 'stopped'}">
+                <div class="player__position">
+                    <md-progress-linear class="md-primary" md-mode="determinate" value="{{curTrackTime}}"></md-progress-linear>
+                </div>
+                <div class="player__position" ng-mouseup="updateTrackOffset($event); setOffsetDraggableState(false);" ng-mousemove="updateTrackOffset($event, true)" ng-mousedown="updateTrackOffset($event); setOffsetDraggableState(true);"></div>
                 <div class="player__controls" ng-switch="curState">
                     <div class="player__play" ng-switch-when="stopped">
                         <md-button class="md-icon-button player__play-button" aria-label="Play" ng-click="play()">
@@ -91,6 +95,19 @@
                     </div>
                 </div>
                 <div class="player__cur-track" ng-bind="curTrack.name"></div>
+                <div class="player__volume">
+                    <div class="player__volume-inner">
+                        <md-button class="md-icon-button" aria-label="Volume button" ng-click="toggleVolume()">
+                            <md-icon md-svg-icon="app/img/icons/ic_volume_up_48px.svg" ng-if="curVolume > 0.7" style="color: #777;"></md-icon>
+                            <md-icon md-svg-icon="app/img/icons/ic_volume_down_48px.svg" ng-if="curVolume > 0.4 && curVolume <= 0.7" style="color: #777;"></md-icon>
+                            <md-icon md-svg-icon="app/img/icons/ic_volume_mute_48px.svg" ng-if="curVolume > 0 && curVolume <= 0.4" style="color: #777;"></md-icon>
+                            <md-icon md-svg-icon="app/img/icons/ic_volume_off_48px.svg" ng-if="!curVolume" style="color: #777;"></md-icon>
+                        </md-button>
+                        <div class="player__slider">
+                            <md-slider class="md-primary" flex md-discrete ng-model="curVolumePercent" step="1" min="0" max="100" aria-label="Volume"></md-slider>
+                        </div>
+                    </div>
+                </div>
                 <div class="player__repeat" ng-class="{'player__repeat_pressed': isLoop}">
                     <md-button class="md-icon-button" aria-label="Repeat button" ng-click="toggleLoop($event)">
                         <md-tooltip md-direction="top">

@@ -300,7 +300,7 @@ angular.module('Shri.services', [
 
             decodeQueue = [],
             curDecodingAudio = 0,
-            simultaneousDecodingLimit = 7,
+            simultaneousDecodingLimit = 5,
             curDecodedTracks = 0,
             decodingLimitTracks = 10;
 

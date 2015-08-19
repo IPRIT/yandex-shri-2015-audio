@@ -1,4 +1,4 @@
-<div class="page">
+<div class="page-wrap">
     <md-content class="header header_fixed">
         <md-toolbar>
             <div class="md-toolbar-tools">
@@ -99,6 +99,10 @@
                             <md-icon md-svg-icon="app/img/icons/ic_pause_48px.svg" style="color: #777;"></md-icon>
                         </md-button>
                     </div>
+                </div>
+                <div class="player__album-cover">
+                    <img class="image player__image ng-scope" ng-src="{{curTrack.photo.base64}}" ng-if="curTrack.photo.base64 && curTrack.photo.base64.length > 0">
+                    <img class="image player__no-image" src="app/img/icons/ic_audiotrack_48px.svg" ng-if="!curTrack.photo.base64">
                 </div>
                 <div class="player__cur-track" ng-bind="curTrack.name"></div>
                 <div class="player__volume">

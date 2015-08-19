@@ -95,9 +95,6 @@ angular.module('Shri.controllers', [
                     }
                     index++;
                     loadFile();
-                    /*AudioPlayer.fillAudioBuffer(track).then(function() {
-                        console.log('Successful decoded', track);
-                    });*/
                 });
             }
         };
@@ -143,6 +140,7 @@ angular.module('Shri.controllers', [
 
         $scope.pause = function() {
             $scope.curState = 'stopped';
+            console.log('paused');
             AudioPlayer.pause(true);
         };
 
@@ -209,6 +207,9 @@ angular.module('Shri.controllers', [
         };
 
         $scope.$on('track_ended', function(e, arg) {
+            if (AudioPlayer.getOffsetTime() < $scope.curTrack.audioBuffer.duration - 1) {
+                return;
+            }
             $scope.curTrack = null;
             if ($scope.trackIndex >= $scope.tracks.length - 1
                 && !AudioPlayer.isLoop()) {

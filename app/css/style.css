@@ -14,8 +14,7 @@ html, body {
     height: 100% !important;
 }
 body {
-    overflow-x: hidden;
-    overflow-y: scroll;
+    overflow: visible !important;
     background-color: #E9E9E9;
 }
 svg:not(:root) {
@@ -57,6 +56,7 @@ textarea {
 .header_fixed {
     position: fixed;
     width: 100%;
+    top: 0;
 }
 .dropzone {
     min-height: 100%;
@@ -415,7 +415,7 @@ textarea {
 }
 .player__volume:hover .player__volume-inner {
     width: 200px;
-    background-color: rgba(79, 127, 240, 0.3);
+    background-color: rgba(166, 166, 166, 0.3);
 }
 .player__volume:hover button {
     margin: 0;
@@ -441,7 +441,7 @@ textarea {
     display: inline-block;
     vertical-align: top;
 }
-.track__album-cover {
+.track__album-cover, .player__album-cover {
     display: inline-block;
     vertical-align: top;
     background-color: #EAEAEA;
@@ -450,7 +450,7 @@ textarea {
     border: 1px solid #CCC;
     margin-right: 16px;
 }
-.track__album-cover .image {
+.track__album-cover .image, .player__album-cover .image {
     padding: 11px;
     opacity: 0.15;
 }
@@ -464,12 +464,27 @@ textarea {
 .player__inner-track:hover .md-bar2, .player__inner-track:hover .md-container {
     height: 10px;
 }
-.track__image {
+.track__image, .player__image {
     width: 100%;
     background-color: #fff;
     height: 100%;
     opacity: 1 !important;
+    box-sizing: border-box;
+}
+.player__no-image {
+    width: 34px;
+    padding: 7px !important;
 }
 .md-dialog-is-showing {
     top: 0 !important;
+}
+.player__album-cover {
+    width: 48px;
+    height: 48px;
+}
+.player__album-cover .image {
+    padding: 2px;
+}
+md-backdrop.md-click-catcher {
+    position: fixed !important;
 }

@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title ng-bind="title">Аудио Плеер</title>
+    <title ng-bind="title"></title>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
 
@@ -14,7 +14,9 @@
 </head>
 <body ng-controller="AppCtrl">
 
-    <div class="view" ng-view></div>
+    <div class="page">
+        <div class="view" ng-view></div>
+    </div>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 

@@ -755,11 +755,20 @@ angular.module('Shri.services', [
         }
 
         function createTrack(file, progressCallback, onReady) {
-            var artist, name;
+            var startTime = new Date().getTime();
+            var artist, name, photo;
             try {
                 id3(file, function(err, tags) {
-                    artist = tags.artist;
-                    name = tags.title;
+                    console.log(tags);
+                    if (tags) {
+                        artist = tags.artist;
+                        name = tags.title;
+                        if (tags.v2 && tags.v2.image && tags.v2.image.data) {
+                            photo = {
+                                base64: arrayBufferToBase64Data(tags.v2.image.data, tags.v2.image.mime)
+                            }
+                        }
+                    }
                     proccessFile();
                 });
             } catch (e) {
@@ -775,11 +784,11 @@ angular.module('Shri.services', [
                     var arrayBuffer = progressEvent.target.result;
                     var track = {
                         id: createUniqId(),
-                        name: name || file.name,
+                        name: name || file.name || 'Unnamed audio',
                         artist: artist || _('unknown_artist_raw'),
                         duration: 0,
                         originalName: file.name,
-                        photo: 'nope',
+                        photo: photo,
                         arrayBuffer: arrayBuffer,
                         audioBuffer: null,
                         isDecoding: false

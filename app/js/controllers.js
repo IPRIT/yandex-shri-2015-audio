@@ -17,7 +17,10 @@ angular.module('Shri.controllers', [
         console.log('Works!');
     }])
 
-    .controller('IndexCtrl', ['$scope', '_', 'AudioPlaylists', 'AudioPlayer', 'AudioTracks', '$interval', '$timeout', '$mdDialog', function($scope, _, AudioPlaylists, AudioPlayer, AudioTracks, $interval, $timeout, $mdDialog) {
+    .controller('IndexCtrl', [
+        '$scope', '_', 'AudioPlaylists', 'AudioPlayer', 'AudioTracks', '$interval', '$timeout', '$mdDialog',
+        function($scope, _, AudioPlaylists, AudioPlayer, AudioTracks, $interval, $timeout, $mdDialog) {
+
         $interval(function() {
             return $scope;
         }, 10);
@@ -92,9 +95,9 @@ angular.module('Shri.controllers', [
                     }
                     index++;
                     loadFile();
-                    AudioPlayer.fillAudioBuffer(track).then(function() {
+                    /*AudioPlayer.fillAudioBuffer(track).then(function() {
                         console.log('Successful decoded', track);
-                    });
+                    });*/
                 });
             }
         };
@@ -127,6 +130,9 @@ angular.module('Shri.controllers', [
                 $scope.curState = AudioPlayer.getCurPlayerState();
                 $scope.loading = false;
                 $scope.playing = true;
+                $scope.$emit('change_title', {
+                    title: track.artist + ' - ' + track.name
+                });
             });
         };
 
@@ -156,6 +162,9 @@ angular.module('Shri.controllers', [
                 $scope.curTrack.audioBuffer = null;
                 $scope.curTrack = null;
                 $scope.curPanelState = 'closed';
+                $scope.$emit('change_title', {
+                    title: _('app_name_raw')
+                });
             }
             for (var i = 0; i < $scope.tracks.length; ++i) {
                 if ($scope.tracks[i].id === track.id) {
@@ -201,7 +210,8 @@ angular.module('Shri.controllers', [
 
         $scope.$on('track_ended', function(e, arg) {
             $scope.curTrack = null;
-            if ($scope.trackIndex >= $scope.tracks.length - 1 && !AudioPlayer.isLoop()) {
+            if ($scope.trackIndex >= $scope.tracks.length - 1
+                && !AudioPlayer.isLoop()) {
                 $scope.pause();
                 return;
             }
@@ -227,14 +237,17 @@ angular.module('Shri.controllers', [
         }, 1000);
 
         $interval(function() {
-            if (!$scope.curTrack || !$scope.curTrack.audioBuffer || $scope.curState === 'stopped') {
+            if (!$scope.curTrack || !$scope.curTrack.audioBuffer
+                || $scope.curState === 'stopped') {
                 return;
             }
-            $scope.curTrackTime = AudioPlayer.getOffsetTime() / $scope.curTrack.audioBuffer.duration * 100;
+            $scope.curTrackTime = AudioPlayer.getOffsetTime()
+                / $scope.curTrack.audioBuffer.duration * 100;
         }, 20);
     }])
 
-    .controller('EqualizerCtrl', ['$scope', '$mdDialog', 'AudioPlayer', '_', function($scope, $mdDialog, AudioPlayer, _) {
+    .controller('EqualizerCtrl', ['$scope', '$mdDialog', 'AudioPlayer', '_',
+        function($scope, $mdDialog, AudioPlayer, _) {
 
         var availableFilters = AudioPlayer.getAvailableFilters(),
             filters = [];

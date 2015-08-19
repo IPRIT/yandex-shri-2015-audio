@@ -41,7 +41,10 @@ angular.module('Shri.controllers', [
         console.log('Works!');
     }])
 
-    .controller('IndexCtrl', ['$scope', '_', 'AudioPlaylists', 'AudioPlayer', 'AudioTracks', '$interval', '$timeout', '$mdDialog', function($scope, _, AudioPlaylists, AudioPlayer, AudioTracks, $interval, $timeout, $mdDialog) {
+    .controller('IndexCtrl', [
+        '$scope', '_', 'AudioPlaylists', 'AudioPlayer', 'AudioTracks', '$interval', '$timeout', '$mdDialog',
+        function($scope, _, AudioPlaylists, AudioPlayer, AudioTracks, $interval, $timeout, $mdDialog) {
+
         $interval(function() {
             return $scope;
         }, 10);
@@ -116,9 +119,9 @@ angular.module('Shri.controllers', [
                     }
                     index++;
                     loadFile();
-                    AudioPlayer.fillAudioBuffer(track).then(function() {
+                    /*AudioPlayer.fillAudioBuffer(track).then(function() {
                         console.log('Successful decoded', track);
-                    });
+                    });*/
                 });
             }
         };
@@ -151,6 +154,9 @@ angular.module('Shri.controllers', [
                 $scope.curState = AudioPlayer.getCurPlayerState();
                 $scope.loading = false;
                 $scope.playing = true;
+                $scope.$emit('change_title', {
+                    title: track.artist + ' - ' + track.name
+                });
             });
         };
 
@@ -180,6 +186,9 @@ angular.module('Shri.controllers', [
                 $scope.curTrack.audioBuffer = null;
                 $scope.curTrack = null;
                 $scope.curPanelState = 'closed';
+                $scope.$emit('change_title', {
+                    title: _('app_name_raw')
+                });
             }
             for (var i = 0; i < $scope.tracks.length; ++i) {
                 if ($scope.tracks[i].id === track.id) {
@@ -225,7 +234,8 @@ angular.module('Shri.controllers', [
 
         $scope.$on('track_ended', function(e, arg) {
             $scope.curTrack = null;
-            if ($scope.trackIndex >= $scope.tracks.length - 1 && !AudioPlayer.isLoop()) {
+            if ($scope.trackIndex >= $scope.tracks.length - 1
+                && !AudioPlayer.isLoop()) {
                 $scope.pause();
                 return;
             }
@@ -251,14 +261,17 @@ angular.module('Shri.controllers', [
         }, 1000);
 
         $interval(function() {
-            if (!$scope.curTrack || !$scope.curTrack.audioBuffer || $scope.curState === 'stopped') {
+            if (!$scope.curTrack || !$scope.curTrack.audioBuffer
+                || $scope.curState === 'stopped') {
                 return;
             }
-            $scope.curTrackTime = AudioPlayer.getOffsetTime() / $scope.curTrack.audioBuffer.duration * 100;
+            $scope.curTrackTime = AudioPlayer.getOffsetTime()
+                / $scope.curTrack.audioBuffer.duration * 100;
         }, 20);
     }])
 
-    .controller('EqualizerCtrl', ['$scope', '$mdDialog', 'AudioPlayer', '_', function($scope, $mdDialog, AudioPlayer, _) {
+    .controller('EqualizerCtrl', ['$scope', '$mdDialog', 'AudioPlayer', '_',
+        function($scope, $mdDialog, AudioPlayer, _) {
 
         var availableFilters = AudioPlayer.getAvailableFilters(),
             filters = [];
@@ -920,6 +933,70 @@ function encodeEntities(value) {
         }).
         replace(/</g, '&lt;').
         replace(/>/g, '&gt;');
+}
+
+/**
+ * @see https://gist.github.com/jonleighton/958841
+ */
+function base64ArrayBuffer(arrayBuffer) {
+    var base64    = '';
+    var encodings = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+    var bytes         = new Uint8Array(arrayBuffer);
+    var byteLength    = bytes.byteLength;
+    var byteRemainder = byteLength % 3;
+    var mainLength    = byteLength - byteRemainder;
+
+    var a, b, c, d;
+    var chunk;
+
+    // Main loop deals with bytes in chunks of 3
+    for (var i = 0; i < mainLength; i = i + 3) {
+        // Combine the three bytes into a single integer
+        chunk = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2];
+
+        // Use bitmasks to extract 6-bit segments from the triplet
+        a = (chunk & 16515072) >> 18; // 16515072 = (2^6 - 1) << 18
+        b = (chunk & 258048)   >> 12; // 258048   = (2^6 - 1) << 12
+        c = (chunk & 4032)     >>  6; // 4032     = (2^6 - 1) << 6
+        d = chunk & 63;               // 63       = 2^6 - 1
+
+        // Convert the raw binary segments to the appropriate ASCII encoding
+        base64 += encodings[a] + encodings[b] + encodings[c] + encodings[d]
+    }
+
+    // Deal with the remaining bytes and padding
+    if (byteRemainder == 1) {
+        chunk = bytes[mainLength];
+
+        a = (chunk & 252) >> 2; // 252 = (2^6 - 1) << 2
+
+        // Set the 4 least significant bits to zero
+        b = (chunk & 3)   << 4; // 3   = 2^2 - 1
+
+        base64 += encodings[a] + encodings[b] + '=='
+    } else if (byteRemainder == 2) {
+        chunk = (bytes[mainLength] << 8) | bytes[mainLength + 1];
+
+        a = (chunk & 64512) >> 10; // 64512 = (2^6 - 1) << 10
+        b = (chunk & 1008)  >>  4; // 1008  = (2^6 - 1) << 4
+
+        // Set the 2 least significant bits to zero
+        c = (chunk & 15)    <<  2; // 15    = 2^4 - 1
+
+        base64 += encodings[a] + encodings[b] + encodings[c] + '='
+    }
+
+    return base64
+}
+
+function arrayBufferToBase64Data(arrayBuffer, mime) {
+    mime = mime || '';
+    var prefix = 'data:' + mime + ';base64,';
+    if (typeof arrayBuffer === 'object') {
+        return prefix + base64ArrayBuffer(arrayBuffer);
+    }
+    return prefix;
 }
 var Waveform = (function() {
   function Waveform(options) {
@@ -1813,11 +1890,20 @@ angular.module('Shri.services', [
         }
 
         function createTrack(file, progressCallback, onReady) {
-            var artist, name;
+            var startTime = new Date().getTime();
+            var artist, name, photo;
             try {
                 id3(file, function(err, tags) {
-                    artist = tags.artist;
-                    name = tags.title;
+                    console.log(tags);
+                    if (tags) {
+                        artist = tags.artist;
+                        name = tags.title;
+                        if (tags.v2 && tags.v2.image && tags.v2.image.data) {
+                            photo = {
+                                base64: arrayBufferToBase64Data(tags.v2.image.data, tags.v2.image.mime)
+                            }
+                        }
+                    }
                     proccessFile();
                 });
             } catch (e) {
@@ -1833,11 +1919,11 @@ angular.module('Shri.services', [
                     var arrayBuffer = progressEvent.target.result;
                     var track = {
                         id: createUniqId(),
-                        name: name || file.name,
+                        name: name || file.name || 'Unnamed audio',
                         artist: artist || _('unknown_artist_raw'),
                         duration: 0,
                         originalName: file.name,
-                        photo: 'nope',
+                        photo: photo,
                         arrayBuffer: arrayBuffer,
                         audioBuffer: null,
                         isDecoding: false

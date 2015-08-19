@@ -1,16 +1,15 @@
 {
   "name": "id3js",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "dist/id3.js",
-  "homepage": "https://github.com/43081j/id3",
-  "_release": "1.0.2",
+  "homepage": "https://github.com/IPRIT/id3",
+  "_release": "1.0.3",
   "_resolution": {
     "type": "version",
-    "tag": "v1.0.2",
-    "commit": "63e244b7249b6dfe5aede6dd055b61e14e7ae88c"
+    "tag": "v1.0.3",
+    "commit": "fd4128e61952923dec3e57d9f0c9dc3fbc8da50b"
   },
-  "_source": "git://github.com/43081j/id3.git",
-  "_target": "~1.0.2",
-  "_originalSource": "id3",
-  "_direct": true
+  "_source": "https://github.com/IPRIT/id3.git",
+  "_target": "1.0.3",
+  "_originalSource": "https://github.com/IPRIT/id3.git"
 }

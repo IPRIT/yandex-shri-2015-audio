@@ -5,7 +5,7 @@
 (function() {
 	var id3 = function(opts, cb) {
 		var options = {
-			type: 'uri',
+			type: 'uri'
 		};
 		if(typeof opts === 'string') {
 			opts = {file: opts, type: 'uri'};
@@ -223,7 +223,7 @@
 				this.ajax(
 					{
 						uri: this.file,
-						type: 'HEAD',
+						type: 'HEAD'
 					},
 					function(err, resp, xhr) {
 						if(err) {
@@ -356,7 +356,11 @@
 			if(raw) {
 				return str;
 			}
-			return decodeURIComponent(escape(str));
+			var dec = '';
+			try {
+				dec = decodeURIComponent(escape(str));
+			} catch (e) {}
+			return dec;
 		};
 
 		DataView.prototype.getStringUtf16 = function(length, offset, bom) {
@@ -384,7 +388,11 @@
 					str += String.fromCharCode(((0xFFC00 & ch) >> 10) + 0xD800) + String.fromCharCode((0x3FF & ch) + 0xDC00);
 				}
 			}
-			return decodeURIComponent(escape(str));
+			var dec = '';
+			try {
+				dec = decodeURIComponent(escape(str));
+			} catch (e) {}
+			return dec;
 		};
 
 		DataView.prototype.getSynch = function(num) {
@@ -526,7 +534,9 @@
 			 * Image frame
 			 */
 			'APIC': 'image',
-			'PIC': 'image'
+			'PIC': 'image',
+
+			'PRIV': 'private'
 		};
 
 		/*
@@ -587,7 +597,9 @@
 			}
 			result.tag = ID3Frame.types[header.id];
 			if(header.type === 'T') {
-				var encoding = dv.getUint8(10);
+				try {
+					var encoding = dv.getUint8(10);
+				} catch (e) {}
 				/*
 				 * TODO: Implement UTF-8, UTF-16 and UTF-16 with BOM properly?
 				 */
@@ -665,6 +677,30 @@
 				image.description = (variableLength === 0 ? null : dv.getString(variableLength, variableStart));
 				image.data = buffer.slice(variableStart + 1);
 				result.value = image;
+			} else if(header.id === 'PRIV') {
+				var privFrame = {
+					description: null,
+					data: null
+				};
+
+				var variableStart = 10;
+				var variableLength = 0;
+
+				for (var i = variableStart;; i++) {
+
+					if (dv.getUint8(i) === 0x00) {
+						variableLength = i - variableStart;
+						break;
+					}
+				}
+
+
+				privFrame.description = (variableLength === 0 ? null : dv.getString(variableLength, variableStart));
+				privFrame.data = buffer.slice(variableLength + variableStart +1);
+
+//					tags.v2[frame.tag] = frame.value;
+
+				result.value = privFrame;
 			}
 			return (result.tag ? result : false);
 		};
@@ -685,7 +721,9 @@
 			}
 			result.tag = ID3Frame.types[header.id];
 			if(header.type === 'T') {
-				var encoding = dv.getUint8(7);
+				try {
+					var encoding = dv.getUint8(7);
+				} catch (err) {}
 				/*
 				 * TODO: Implement UTF-8, UTF-16 and UTF-16 with BOM properly?
 				 */
@@ -866,7 +904,9 @@
 						 */
 						if(tags.v2.version[0] < 3) {
 							slice = buffer.slice(position, position + 6 + dv.getUint24(position + 3));
-						} else {
+						} else if(tags.v2.version[0] === 3) {
+							slice = buffer.slice(position, position + 10 + dv.getUint32(position + 4));
+						} else if(tags.v2.version[0] === 4) {
 							slice = buffer.slice(position, position + 10 + dv.getUint32Synch(position + 4));
 						}
 						frame = ID3Frame.parse(slice, tags.v2.version[0]);
@@ -896,7 +936,7 @@
 			});
 		});
 	};
-	if(typeof module !== 'undefined' && module.exports) {
+	if (typeof module !== 'undefined' && module.exports) {
 		module.exports = id3;
 	} else {
 		if(typeof define === 'function' && define.amd) {

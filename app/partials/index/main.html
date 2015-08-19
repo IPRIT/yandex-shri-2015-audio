@@ -36,13 +36,19 @@
                                 <md-icon md-svg-icon="app/img/icons/ic_pause_48px.svg" style="color: #555;" ng-switch-when="stopped"></md-icon>
                             </div>
                             <div class="track__info">
-                                <div class="track__name">{{track.name}}</div>
-                                <div class="track__artist">{{track.artist}}</div>
+                                <div class="track__album-cover">
+                                    <img class="image track__image" ng-src="{{track.photo.base64}}" ng-if="track.photo.base64 && track.photo.base64.length > 0">
+                                    <img class="image" src="app/img/icons/ic_audiotrack_48px.svg" ng-if="!track.photo.base64">
+                                </div>
+                                <div class="track__data">
+                                    <div class="track__name">{{track.name}}</div>
+                                    <div class="track__artist">{{track.artist}}</div>
+                                </div>
                             </div>
                             <div class="track__spinner" ng-show="track.isDecoding">
                                 <md-progress-circular md-mode="indeterminate" class="progress-circular__small"></md-progress-circular>
                             </div>
-                            <div class="track__ready" ng-show="!!track.audioBuffer">
+                            <div class="track__ready" ng-show="!!track.audioBuffer && !track.isDecoding">
                                 <md-icon md-svg-icon="app/img/icons/ic_done_all_48px.svg" style="color: #555;"></md-icon>
                             </div>
                         </md-button>

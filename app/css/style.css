@@ -440,6 +440,7 @@ textarea {
 .track__data {
     display: inline-block;
     vertical-align: top;
+    width: 100%;
 }
 .track__album-cover, .player__album-cover {
     display: inline-block;
@@ -487,4 +488,20 @@ textarea {
 }
 md-backdrop.md-click-catcher {
     position: fixed !important;
+}
+.track__info {
+    width: 65%;
+}
+.track__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media screen and (max-width: 400px) {
+    .tracks__inner {
+        padding: 20px 0;
+    }
+    .player__inner-track {
+        padding: 20px 5px;
+    }
 }
